@@ -18,7 +18,6 @@
 	</insert>
 	
 	
-
 	<resultMap id="bookResultMap" type="book.dto.BookDTO">
 	<id column="isbn" property="isbn"/>
 	<result column="title" property="title"/>

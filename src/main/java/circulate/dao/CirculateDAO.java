@@ -113,6 +113,20 @@ public class CirculateDAO {
 		return due_date;
 		
 	}
+
+	public int getReservNum(long isbn) {
+		
+		int reservNum = 0;
+		
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			
+			reservNum = session.selectOne("circulate.getReservNum", isbn);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return reservNum;
+	}
 	
 
 

@@ -9,7 +9,7 @@
 	<insert id="checkout" parameterType="circulate.dto.CheckoutDTO">
 	insert into checkout
 	(checkout_id, copy_id, isbn, user_id, checkout_date, due_date) 
-	values(checkout_id_seq.nextval, #{copy_id}, #{isbn}, #{user_id}, sysdate, sysdate)
+	values(checkout_id_seq.nextval, #{copy_id}, #{isbn}, #{user_id}, sysdate, #{due_date})
 	</insert>
 		
 				
@@ -26,6 +26,15 @@
     and coalesce(trunc(renewal_date+1),trunc(due_date+1)) <![CDATA[<]]> trunc(sysdate+1)
     ) as late_returns
     from dual	
+    </select>
+    
+    <select id="getReservNum" resultType="int">
+    select count(*) from reservation
+	where isbn = #{isbn}
+	and
+	checkout_date is null
+	and
+	expire_date is null
     </select>
 
 

@@ -2,6 +2,7 @@
 <%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <%@page import="book.dto.CopyDTO"%>
 <%@page import="book.dto.BookDTO"%>
@@ -305,7 +306,28 @@
 
     <script>
 
+    
+	function reservation_window(yn){
+		
+		
+		let top = screen.availHeight/2 - 400;
+		if(top < 0) top = 0;
 
+		let left = screen.availWidth/2 - 300;
+		if(left < 0) left = 0;
+		
+		if(yn == 'y'){
+			alert("로그인");
+			window.open("${path}/checkout/checkout.jsp", "도서예약",  "left="+left+", top="+top+", width=300, height=400");
+		}
+		
+		else{
+			alert("로그인안됨");
+			window.open("${path}/checkout/checkout.jsp", "도서예약",  "left="+left+", top="+top+", width=300, height=400");
+			//팝업창 띄우고 로그인->예약 순
+		}
+		
+	}
 
     </script>
 
@@ -447,12 +469,33 @@
                         <td>${copy.call_number}</td>
                         <td>${copy.location}</td>
                         <td>${copy.status}</td>
-                        <td>${copy.due_date}</td>
+                        <td><fmt:formatDate value="${copy.due_date}" pattern="yyyy-MM-dd"/></td>
                         <td>
+                        <c:if test="${status.count == 1}">
+                            <c:choose>
+	                        	<c:when test="${reservation_ok && sessionScope.user_id != null && sessionScope.user_id != ''}">
+	                        	<a onclick="reservation_window('y')">예약가능<br>
+	                        	(${reservation_count}명 예약중)
+	                        	</a>
+	                        	</c:when>
+	                        	<c:when test="${reservation_ok && (sessionScope.user_id == null || sessionScope.user_id == '')}">
+	                        	<a href="#" onclick="reservation_window('n')">예약가능<br>
+	                        	(${reservation_count}명 예약중)
+	                        	</a>
+	                        	</c:when>
+	                        	<c:when test="${!reservation_ok && reservation_count >= copies.size()}">
+	                        	예약한도초과<br>
+	                        	(${reservation_count}명 예약중)
+	                        	</c:when>
+	                        	<c:when test="${status.count == 0 && reservation_ok}">
+	                        	예약불가<br>
+	                        		<c:if test="${reservation_count} > 0">
+	                        		(${reservation_count}명 예약중)
+	                        		</c:if>
+	                        	</c:when>
+                            </c:choose>
                         
-                        <c:if test="${sessionScope.user_id!=null && sessionScope.user_id!=''}">
                         </c:if>
-                        
                         </td>
                     </tr>
                     </c:forEach>

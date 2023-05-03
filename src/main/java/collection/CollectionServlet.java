@@ -1,6 +1,5 @@
 package collection;
 
-import java.awt.print.Pageable;
 import java.io.IOException;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import book.dao.BookDAO;
 import book.dto.BookDTO;
 import collection.dao.CollectionDAO;
 import work.Pager;
@@ -28,6 +26,8 @@ public class CollectionServlet extends HttpServlet {
 		CollectionDAO dao = new CollectionDAO();
 		
 		if(uri.indexOf("top_list.do")!=-1) {
+			
+			System.out.println("list진입");
 
 			String category = "";
 			int days = 30;
@@ -65,6 +65,7 @@ public class CollectionServlet extends HttpServlet {
 			request.setAttribute("days", days);
 			String page = "";
 			page = "/collection/tops.jsp";
+			System.out.println("forward");
 			RequestDispatcher rd = request.getRequestDispatcher(page);
 			rd.forward(request, response);
 			

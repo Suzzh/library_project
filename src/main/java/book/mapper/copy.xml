@@ -21,8 +21,8 @@
   	<result property="call_number" column="call_number" />
   	<result property="status" column="status" />
   	 <association property="bookDTO" javaType="book.dto.BookDTO">
-    <id property="isbn" column="isbn" />
-    <result property="title" column="title" />
+	    <id property="isbn" column="isbn" />
+   		<result property="title" column="title" />
     </association>
     </resultMap>
 	
@@ -40,6 +40,7 @@
 	left join (select * from checkout where return_date is null) chk on c.copy_id = chk.copy_id
 	join books b on c.isbn = b.isbn
 	where b.isbn = #{isbn}
+	order by c.copy_id
 	</select>
 	
 	

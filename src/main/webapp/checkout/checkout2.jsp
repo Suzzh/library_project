@@ -260,8 +260,7 @@
                         return false;
                     }
                 }
-
-            	
+                
         		$.ajax({
         			type: "get", //ajax에선 get이랑 post 차이가 뭐지?
         			url : "${path}/book_servlet/view_copy.do",

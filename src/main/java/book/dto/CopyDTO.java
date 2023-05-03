@@ -9,7 +9,7 @@ public class CopyDTO {
 	private String call_number, location, status;
 	private String acquisition_date;
 	private BookDTO bookDTO;
-	private String due_date;
+	private Date due_date;
 
 	
 	public CopyDTO() {
@@ -101,12 +101,12 @@ public class CopyDTO {
 	}
 	
 	
-	public String getDue_date() {
+	public Date getDue_date() {
 		return due_date;
 	}
 
 
-	public void setDue_date(String due_date) {
+	public void setDue_date(Date due_date) {
 		this.due_date = due_date;
 	}
 

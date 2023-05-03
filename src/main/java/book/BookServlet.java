@@ -21,6 +21,7 @@ import book.dto.AuthorDTO;
 import book.dto.BookDTO;
 import book.dto.CopyDTO;
 import book.dto.FilterDTO;
+import circulate.dao.CirculateDAO;
 import work.Pager;
 
 
@@ -207,9 +208,6 @@ public class BookServlet extends HttpServlet {
 			
 		} else if(uri.indexOf("search.do")!=-1) {
 			
-			
-			System.out.println("bookSearvlet 진입" + System.currentTimeMillis());
-			
 			String type = "key";
 			
 			if(request.getParameter("type")!=null) type = request.getParameter("type");
@@ -359,11 +357,37 @@ public class BookServlet extends HttpServlet {
 		else if(uri.indexOf("view.do")!=-1) {
 			
 			long isbn = Long.parseLong(request.getParameter("isbn"));
-			Boolean bool = bdao.chkCopyAvailable(isbn);
+			//Boolean bool = bdao.chkCopyAvailable(isbn);
 			BookDTO bdto = bdao.view(isbn);
 			List<CopyDTO> copies = cdao.list(isbn);
+			
+			CirculateDAO cirDao = new CirculateDAO();
+			int reservation_count = cirDao.getReservNum(isbn);
+			
+			//예약가능여부 결정<view.do말고 reservation.do로 옮겨야 함>
+			//대출가능, 대출중, 예약서가,  분실, 파손, 대출불가, 정리중 가운데
+			//1) 대출가능한 책이 한 권도 없으면서
+			//2) 모든 책이 분실, 파손, 대출불가가 아니고 (정리중/예약서가/대출중이 한권이라도 있고)
+			//3) 예약자가 copy*10을 초과하지 않는 경우 -> 구현해야 함
+			
+			Boolean reservation_ok = false;
+			
+			if(copies!=null) {
+				Stream<CopyDTO> copyStream = copies.stream();
+				Stream<CopyDTO> copyStream2 = copies.stream();
+				if(copyStream.noneMatch(c -> c.getStatus().equals("대출가능")) &&
+						copyStream2.anyMatch(c -> c.getStatus().equals("정리중") || c.getStatus().equals("예약서가") || c.getStatus().equals("대출중")) &&
+						copies.size()*10 > reservation_count) {
+					reservation_ok = true;
+				}
+			}
+			
 			request.setAttribute("bdto", bdto);
 			request.setAttribute("copies", copies);
+			request.setAttribute("reservation_ok", reservation_ok);
+			System.out.println("reservation_ok" + reservation_ok);
+			request.setAttribute("reservation_count", reservation_count);
+			System.out.println(reservation_count);
 			/*RequestDispatcher dispatcher = request.getRequestDispatcher("/book/search.jsp");
 			dispatcher.forward(request, response); */
 
@@ -377,7 +401,9 @@ public class BookServlet extends HttpServlet {
 		else if(uri.indexOf("view_copy.do")!=-1) {
 			
 			int copy_id = Integer.parseInt(request.getParameter("copy_id"));
+			System.out.println("카피아이디" + copy_id);
 			CopyDTO cdto = cdao.viewCopy(copy_id);
+			System.out.println("카피상태" + cdto.getStatus());
 			
 			if(cdto != null) {
 				System.out.println("copy title은" + cdto.getBookDTO().getTitle());
@@ -391,6 +417,7 @@ public class BookServlet extends HttpServlet {
 
 		
 	}
+		
 
 		
 	
