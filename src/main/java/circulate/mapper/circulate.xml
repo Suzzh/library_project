@@ -8,8 +8,8 @@
 	
 	<insert id="checkout" parameterType="circulate.dto.CheckoutDTO">
 	insert into checkout
-	(checkout_id, copy_id, user_id, checkout_date, due_date) 
-	values(checkout_id_seq.nextval, #{copy_id}, #{user_id}, sysdate, sysdate)
+	(checkout_id, copy_id, isbn, user_id, checkout_date, due_date) 
+	values(checkout_id_seq.nextval, #{copy_id}, #{isbn}, #{user_id}, sysdate, sysdate)
 	</insert>
 		
 				

@@ -501,6 +501,73 @@
 		join author a on ba.author_id = a.author_id
 		where b.isbn = #{isbn}
 	</select>
+	
+	
+	<resultMap id="topBookMap" type="java.util.Map">
+	<result column="isbn" property="isbn"/>
+	<result column="checkout_times" property="checkout_times"/>
+	<result column="rn" property="rn"/>
+	<result column="title" property="title"/>
+	<result column="publisher_name" property="publisher_name"/>
+	<result column="img_url" property="img_url"/>
+	<result column="authornames" property="authornames"/>	
+	</resultMap>
+	
+	<select id="topList" resultMap="topBookMap">
+      select result.*, b.title, b.img_url, b.publisher_name, LISTAGG(a.author_name, ';') within group (order by ba.preference desc, a.author_id) as authornames
+      from
+      (select tmp.*, row_number() over(order by checkout_times desc) as rn
+	  from
+      (
+      select chk.isbn, count(*) as checkout_times
+      from checkout chk
+      <choose>
+      	<when test="classification_code != null and classification_code != ''">
+      	inner join books b on b.isbn = chk.isbn
+      	where substr(b.classification_code, 0, 1) in (${classification_code})
+      	and checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
+        </when>
+        <otherwise>
+        where checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
+        </otherwise>
+      </choose>   
+      group by chk.isbn
+      order by checkout_times desc
+      )tmp
+      )result
+      inner join books b on result.isbn = b.isbn
+      inner join book_author ba on b.isbn = ba.isbn
+      inner join author a on ba.author_id = a.author_id
+      where rn between #{start} and #{end}
+      group by b.title, b.img_url, b.publisher_name, rn, result.isbn, checkout_times
+      order by rn
+	</select>
+	
+	
+	<select id="getTopNums" resultType="int">
+     select count(*)
+      from
+      (select tmp.*, row_number() over(order by checkout_times desc) as rn
+      from
+      (
+      select chk.isbn, count(*) as checkout_times
+      from checkout chk
+      <choose>
+      	<when test="classification_code != null and classification_code != ''">
+      	inner join books b on b.isbn = chk.isbn
+      	where substr(b.classification_code, 0, 1) in (${classification_code})
+      	and checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
+        </when>
+        <otherwise>
+        where checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
+        </otherwise>
+      </choose>
+      group by chk.isbn
+      order by checkout_times desc
+      )tmp
+      )result
+      where rn <![CDATA[<]]>= #{max}
+	</select>
 
 
 

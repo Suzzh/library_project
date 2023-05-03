@@ -165,20 +165,35 @@ public class BookDAO {
     return list;
 	}
 
-	
-	
+
 	public BookDTO view(long isbn) {
 		
 		BookDTO bdto = null;
 		
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
 			bdto = session.selectOne("book.view", isbn);
+			//copy등록번호 순으로 출력되게끔 변경
 			} catch (Exception e) {
 	        e.printStackTrace();
 	    	}
 	    
 	    return bdto;
 		}
+
+	public Boolean chkCopyAvailable(long isbn) {
+		
+		//해당 도서에 대출 가능한 사본이 있는지 확인
+		Boolean chk = false;
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			int count = session.selectOne("book.chkCopyAvailable", isbn);
+			if(count > 0) chk = true;		
+			} catch (Exception e) {
+	        e.printStackTrace();
+	    	}
+		
+		
+		return chk;
+	}
 
 	
 	

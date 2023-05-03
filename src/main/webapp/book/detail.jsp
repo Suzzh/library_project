@@ -359,7 +359,14 @@
         </div>
         <div class="profile">
             <div class="bookImgWrapper">
-                <img src="${bdto.img_url}" class="book_img">
+              <c:choose>
+              	<c:when test="${bdto.img_url!='' && bdto.img_url!=null}">
+	              <img src="${bdto.img_url}" class="book_img">
+                </c:when>
+                <c:otherwise>
+                  <img src="${path}/include/default_book.png" class="book_img">
+                </c:otherwise>
+               </c:choose>
             </div>
                 <div class="bookDetail">
                 <table>
@@ -441,7 +448,12 @@
                         <td>${copy.location}</td>
                         <td>${copy.status}</td>
                         <td>${copy.due_date}</td>
-                        <td></td>
+                        <td>
+                        
+                        <c:if test="${sessionScope.user_id!=null && sessionScope.user_id!=''}">
+                        </c:if>
+                        
+                        </td>
                     </tr>
                     </c:forEach>
 

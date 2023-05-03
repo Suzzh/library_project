@@ -139,7 +139,10 @@
     
     .selected{
       background-color: #e9f8d1;
+    }
     
+    .prohibited{
+      background-color: #FFE4E1;
     }
 
     #btnChangeDueDate, #btnCheckout, #btnDelete, #btnReset, #btnSearchBook{
@@ -309,7 +312,7 @@
         if(document.getElementsByClassName("selected").length > 0)
         	{
         	
-        	let selectedRows = $("form[name=checkoutForm] input[type=checkbox]:checked").closest("tr");
+        	let selectedRows = $("form[name=checkoutForm] input[type=checkbox]:checked").closest("tr").not(".prohibited");
         	let data = [];
         	
         	//let user_id = $("input[name='user_id']").val();
@@ -318,14 +321,16 @@
         	  let row = $(this);
         	  let copy_id = row.find("input[name=checkoutCheck]").val();
         	  let due_date = row.find("input[name=due_date]").val();
+        	  let isbn = row.find("input[name=isbn]").val();
         	  let title = row.find("input[name=title]").val();
-        	  
+
         	  data.push({
-        		user_id: "${user_id}",
+        		user_id: "${dto.user_id}",
         		user_type: "${type}",
         	    copy_id: copy_id,
         	    due_date: due_date,
-        	    title: title
+        	    title: title,
+        	    isbn: isbn
         	  });
         	});
         	
@@ -344,27 +349,28 @@
     			type: "post",
     			url : "${path}/circulate_servlet/checkout.do",
     			data : JSON.stringify(data),
-    			contentType: 'application/json',
+    			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
     			dataType: "json",
     			success: function(result){
-                   
-                    let successList = result.successList;
     				
+                    let successList = result.successList;
+                    
     				if(successList.length > 0){
-    					
+    				
     					let message = "*** 총 " + successList.length + "권의 도서가 성공적으로 대출되었습니다. ***\n";
-    					
+    	                    	
     					for(let i=0; i<successList.length; i++){
     						message += (i+1 + ") ");
-                            let id = successList[i];
-                            let tr = document.getElementById(id);
-                            let value = tr.children[2].innerHTML;
-                            message += value + "\n";
-                            tr.remove();
+                            let dto = successList[i];
+                            message += dto.title + "\n";
+                            let copy_id = dto.copy_id;
+                            let tr = document.getElementById(copy_id);
+                            $(tr).remove();
                             numbering();
     					}
     							
     					alert(message);
+    				
 
     					
     				} else {

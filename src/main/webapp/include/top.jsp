@@ -37,7 +37,7 @@
   <div class="nav">
     <ul class="menu">
       <li><a href="${path}/book/search.jsp" class="toMenu" title="도서검색">도서검색</a></li>
-      <li><a href="${path}/collection/tops.jsp" class="toMenu" title="컬렉션">컬렉션</a></li>
+      <li><a href="${path}/collection_servlet/top_list.do" class="toMenu" title="컬렉션">컬렉션</a></li>
       <li>도서관서비스</li>
       <li><a href="${path}/notice_servlet/board.do" class="toMenu" title="도서관안내">도서관안내</a></li>
       <li>내 서재</li>

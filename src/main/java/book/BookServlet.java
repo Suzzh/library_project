@@ -359,6 +359,7 @@ public class BookServlet extends HttpServlet {
 		else if(uri.indexOf("view.do")!=-1) {
 			
 			long isbn = Long.parseLong(request.getParameter("isbn"));
+			Boolean bool = bdao.chkCopyAvailable(isbn);
 			BookDTO bdto = bdao.view(isbn);
 			List<CopyDTO> copies = cdao.list(isbn);
 			request.setAttribute("bdto", bdto);
@@ -379,6 +380,7 @@ public class BookServlet extends HttpServlet {
 			CopyDTO cdto = cdao.viewCopy(copy_id);
 			
 			if(cdto != null) {
+				System.out.println("copy title은" + cdto.getBookDTO().getTitle());
 				request.setAttribute("cdto", cdto);
 				page = "/checkout/copy_list.jsp";			
 				RequestDispatcher rd = request.getRequestDispatcher(page);

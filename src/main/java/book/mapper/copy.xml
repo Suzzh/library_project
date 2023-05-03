@@ -5,6 +5,11 @@
 
 <mapper namespace="copy">
 
+	<select id="checkStatus" resultType="String">
+	select status from copy
+    where copy_id = ${copy_id}
+	</select>
+
 	<select id="checkUniqueness" parameterType="String" resultType="long">
 	select copy_id from copy where call_number=#{call_number}
 	</select>
@@ -23,7 +28,7 @@
 	
 
 	<select id="view" parameterType="int" resultMap="copyViewMap">
-	select c.copy_id, b.title, c.location, c.call_number, c.status
+	select c.copy_id, b.title, c.location, c.call_number, c.status, c.isbn
 	from copy c
 	join books b on b.isbn=c.isbn
 	where c.copy_id = #{copy_id}

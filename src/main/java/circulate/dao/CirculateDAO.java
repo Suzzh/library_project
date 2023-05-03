@@ -19,7 +19,6 @@ public class CirculateDAO {
 
 	public List<CheckoutDTO> checkout(List<CheckoutDTO> dtoList) {
 		
-		System.out.println("dao.checkout 진입");
 		List <CheckoutDTO> successfulCheckouts = new ArrayList<>();
 		
 		try (SqlSession session = MybatisManager.getInstance().openSession())
@@ -35,13 +34,14 @@ public class CirculateDAO {
 					if(Integer.parseInt(String.valueOf(checkoutsMap.get("CHECKOUTS")))>=Library.getMaxBorrow(dtoList.get(i).getUser_type()) 
 							|| Integer.parseInt(String.valueOf(checkoutsMap.get("LATE_RETURNS")))>0) break;
 					
-					//copy 상태 확인 후 대출하게끔 수정요망
+					
+					//대출가능, 대출중, 예약서가,  분실, 파손, 대출불가, 정리중 가운데
+					//대출가능, 예약서가, 정리중인 경우에만 대출 가능
+					String copyStatus = session.selectOne("copy.checkStatus", dtoList.get(i).getCopy_id());
+					if(!copyStatus.equals("대출가능") && !copyStatus.equals("예약서가") && !copyStatus.equals("정리중")) continue;
 					int checkoutResult = session.insert("circulate.checkout", dtoList.get(i));
 					
-					System.out.println("result는" + checkoutResult);
-					
 					if(checkoutResult == 1) {
-						
 						CopyDTO copy = new CopyDTO();
 						copy.setCopy_id(dtoList.get(i).getCopy_id());
 						copy.setStatus("대출중");
@@ -49,25 +49,20 @@ public class CirculateDAO {
 						
 						if(updateResult == 1) {
 							successfulCheckouts.add(dtoList.get(i));
-							System.out.println("대출성공");
 						}
 					}
 				}
 				
-				System.out.println("커밋");
 				session.commit();
 						
 				} catch (Exception e) {
-					System.out.println("에러발생1");
 					session.rollback();
 					e.printStackTrace();
 				} 
 			} catch (Exception e) {
-				System.out.println("에러발생2");
 			e.printStackTrace();
 		}
 		
-		System.out.println("체크아웃 나가기");
 		return successfulCheckouts;
 		
 		

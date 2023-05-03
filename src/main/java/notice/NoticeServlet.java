@@ -47,9 +47,6 @@ public class NoticeServlet extends HttpServlet {
 			int start = pager.getPageBegin();
 			int end = pager.getPageEnd();
 			
-			System.out.println("start : " + start);
-			System.out.println("end : " + end);
-			
 			List<NoticeDTO> notices = dao.boardList(category, start, end);
 			request.setAttribute("count", count);
 			request.setAttribute("notices", notices);

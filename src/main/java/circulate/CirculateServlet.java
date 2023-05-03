@@ -44,6 +44,7 @@ public class CirculateServlet extends HttpServlet {
 		CirculateDAO dao = new CirculateDAO();
 		
 		if(uri.indexOf("checkout.do")!=-1) {
+			
 			 BufferedReader reader = request.getReader();
 			 StringBuilder sb = new StringBuilder();
 			 String line;
@@ -56,6 +57,7 @@ public class CirculateServlet extends HttpServlet {
 			
 		 
 			String jsonString = sb.toString();
+			System.out.println("jsonString : " + jsonString);
 			
 			Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
 
@@ -67,6 +69,10 @@ public class CirculateServlet extends HttpServlet {
 			*/
 			
 			List<CheckoutDTO> dtoList = gson.fromJson(jsonString, listType);
+			
+			for(int i=0; i<dtoList.size(); i++) {
+				System.out.println("isbn : " + dtoList.get(i).getIsbn());
+			}
 									
 			List<CheckoutDTO> successList = dao.checkout(dtoList);
 			
@@ -76,6 +82,9 @@ public class CirculateServlet extends HttpServlet {
 			Gson returnGson = new Gson();
 			String json = returnGson.toJson(map);
 			
+			//한글깨짐 방지
+		    response.setCharacterEncoding("utf-8");
+		    
 			PrintWriter writer = response.getWriter();
 			writer.write(json.toString());
 			writer.flush();
