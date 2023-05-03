@@ -88,27 +88,15 @@ public class MemberServlet extends HttpServlet {
 			
 			MemberDTO dto = null;
 			dto = dao.view(user_id);
-				
-			if(dto!=null) {
-				Map<String, Object> checkoutsMap = CirculateDAO.getCheckout(user_id);
-				
-				int numCheckedOut = Integer.parseInt(String.valueOf(checkoutsMap.get("CHECKOUTS")));
-				int numLateReturns = Integer.parseInt(String.valueOf(checkoutsMap.get("LATE_RETURNS")));
+			
 
-				if(numCheckedOut > Library.getMaxBorrow(dto.getUser_type()) || numLateReturns >= 1) {
-					dto.setCheckout_status("대출불가");
-				}
-				
-				else dto.setCheckout_status("정상");
-					
-				System.out.println(3);
-				request.setAttribute("numCheckedOut", numCheckedOut);
-				request.setAttribute("numLateReturns", numLateReturns);
+			if(dto!=null) {
+				dto = dao.setCheckoutStatus(dto);
 				request.setAttribute("dto", dto);
 				page = "/checkout/checkout2.jsp";
-				System.out.println(4);
 				RequestDispatcher rd = request.getRequestDispatcher(page);
 				rd.forward(request, response);
+
 				} 
 			
 			else {
@@ -117,6 +105,30 @@ public class MemberServlet extends HttpServlet {
 			}
 			
 		}
+		
+		
+		else if(uri.indexOf("myCheckouts.do")!=-1) {
+			
+			Long user_id = null;
+			String page = "";
+			
+			HttpSession session = request.getSession();
+			if(session.getAttribute("user_id")==null || session.getAttribute("user_id").equals("")) {
+				//로그인창으로 보내기 (추후 필터 등으로 보완)
+			}
+			
+			user_id = (Long)(session.getAttribute("user_id"));
+	
+			MemberDTO dto = new MemberDTO();
+			dto.setUser_id(user_id);
+
+			dto = dao.setCheckoutStatus(dto);
+			request.setAttribute("dto", dto);
+			page = "/mylibrary/issue.jsp";
+			RequestDispatcher rd = request.getRequestDispatcher(page);
+			rd.forward(request, response);
+
+			} 
 			
 						
 	}

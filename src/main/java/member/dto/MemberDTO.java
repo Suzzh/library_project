@@ -19,10 +19,13 @@ public class MemberDTO {
 	private String tel2;
 	private Date birthdate;
 	
+	
 	private StudentDTO sdto;
 	private ProfessorDTO pdto;
 
 	private String checkout_status;
+	private int numCheckedOut;
+	private int numLateReturns;
 
 	public long getUser_id() {
 		return user_id;
@@ -136,13 +139,33 @@ public class MemberDTO {
 		this.checkout_status = checkout_status;
 	}
 
+	public int getNumCheckedOut() {
+		return numCheckedOut;
+	}
+
+	public void setNumCheckedOut(int numCheckedOut) {
+		this.numCheckedOut = numCheckedOut;
+	}
+
+	public int getNumLateReturns() {
+		return numLateReturns;
+	}
+
+	public void setNumLateReturns(int numLateReturns) {
+		this.numLateReturns = numLateReturns;
+	}
+
 	@Override
 	public String toString() {
-		return "MemberDTO [user_id=" + user_id + ", user_type=" + user_type + ", name=" + name + ", gender="
-				+ gender + ", zipcode=" + zipcode + ", address1=" + address1 + ", address2=" + address2 + ", email="
-				+ email + ", tel1=" + tel1 + ", tel2=" + tel2 + ", birthdate=" + birthdate + ", sdto=" + sdto
-				+ ", pdto=" + pdto + ", checkout_status=" + checkout_status + "]";
+		return "MemberDTO [user_id=" + user_id + ", user_type=" + user_type + ", name=" + name + ", gender=" + gender
+				+ ", zipcode=" + zipcode + ", address1=" + address1 + ", address2=" + address2 + ", email=" + email
+				+ ", tel1=" + tel1 + ", tel2=" + tel2 + ", birthdate=" + birthdate + ", sdto=" + sdto + ", pdto=" + pdto
+				+ ", checkout_status=" + checkout_status + ", numCheckedOut=" + numCheckedOut + ", numLateReturns="
+				+ numLateReturns + "]";
 	}
+	
+	
+
 
 
 	

@@ -478,7 +478,7 @@
           </li>
           <li>
             <div>대출도서</div>
-            <div>${numCheckedOut}/<%= max_borrow %></div>
+            <div>${dto.numCheckedOut}/<%= max_borrow %></div>
           </li>
           <li>
             <div>예약도서</div>
@@ -486,7 +486,7 @@
           </li>
           <li>
             <div>연체도서</div>
-            <div>${numLateReturns}</div>
+            <div>${dto.numLateReturns}</div>
             <!--얘네 클릭해서 정보 확인하거나 가져올 수 있게-->
           </li>
         </ul>

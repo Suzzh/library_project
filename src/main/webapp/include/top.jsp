@@ -40,7 +40,7 @@
       <li><a href="${path}/collection_servlet/top_list.do" class="toMenu" title="컬렉션">컬렉션</a></li>
       <li>도서관서비스</li>
       <li><a href="${path}/notice_servlet/board.do" class="toMenu" title="도서관안내">도서관안내</a></li>
-      <li>내 서재</li>
+      <li><a href="${path}/mylibrary/issue.jsp" class="toMenu" title="내 서재">내 서재</a></li>
       <li>#</li>
     </ul>
   </div>

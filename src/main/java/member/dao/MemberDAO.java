@@ -3,13 +3,17 @@ package member.dao;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.RequestDispatcher;
+
 import org.apache.ibatis.session.SqlSession;
 
+import circulate.dao.CirculateDAO;
 import member.dto.MemberDTO;
 import member.dto.ProfessorDTO;
 import member.dto.StudentDTO;
 import member.dto.UserDTO;
 import sqlmap.MybatisManager;
+import work.Library;
 
 public class MemberDAO {
 			
@@ -56,5 +60,27 @@ public class MemberDAO {
 			}
 			
 			return name;
+		}
+		
+		
+
+		public MemberDTO setCheckoutStatus(MemberDTO dto) {
+			
+			//아예 checkoutDTO들을 받아오는걸로 바꾸기 ~ 범용성있게
+			Map<String, Object> checkoutsMap = CirculateDAO.getCheckout(dto.getUser_id());
+			
+			int numCheckedOut = Integer.parseInt(String.valueOf(checkoutsMap.get("CHECKOUTS")));
+			int numLateReturns = Integer.parseInt(String.valueOf(checkoutsMap.get("LATE_RETURNS")));
+
+			dto.setNumCheckedOut(numCheckedOut);
+			dto.setNumLateReturns(numLateReturns);
+			
+			if(numCheckedOut > Library.getMaxBorrow(dto.getUser_type()) || numLateReturns >= 1) {
+				dto.setCheckout_status("대출불가");
+			}
+			
+			else dto.setCheckout_status("정상");
+			
+			return dto;
 		}
 }
