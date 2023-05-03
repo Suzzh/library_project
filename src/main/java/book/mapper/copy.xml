@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="copy">
+
+	<select id="checkUniqueness" parameterType="String" resultType="long">
+	select copy_id from copy where call_number=#{call_number}
+	</select>
+	
+	
+	<resultMap id="copyViewMap" type="book.dto.CopyDTO">
+	<id property="copy_id" column="copy_id" />
+ 	<result property="location" column="location" />
+  	<result property="call_number" column="call_number" />
+  	<result property="status" column="status" />
+  	 <association property="bookDTO" javaType="book.dto.BookDTO">
+    <id property="isbn" column="isbn" />
+    <result property="title" column="title" />
+    </association>
+    </resultMap>
+	
+
+	<select id="view" parameterType="int" resultMap="copyViewMap">
+	select c.copy_id, b.title, c.location, c.call_number, c.status
+	from copy c
+	join books b on b.isbn=c.isbn
+	where c.copy_id = #{copy_id}
+	</select>
+	
+	<select id="list" parameterType="long" resultType="book.dto.CopyDTO">
+	select c.copy_id, c.call_number, c.location, c.status, chk.due_date
+	from copy c
+	left join (select * from checkout where return_date is null) chk on c.copy_id = chk.copy_id
+	join books b on c.isbn = b.isbn
+	where b.isbn = #{isbn}
+	</select>
+	
+	
+	<insert id="add" parameterType="book.dto.CopyDTO">
+	insert into copy (copy_id, isbn, call_number, location, status) 
+	values (copy_id_seq.nextval, #{isbn}, #{call_number}, #{location}, #{status})
+	</insert>
+	
+	
+	<update id="updateStatus" parameterType="book.dto.CopyDTO">
+	update copy
+    set status = #{status}
+    where copy_id = #{copy_id}
+	</update>
+	
+
+</mapper>

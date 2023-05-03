@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="member">
+
+
+	<select id="loginCheck" resultType="String">
+	select name from users
+	where user_id=#{user_id} and passwd=#{passwd}
+	
+	</select>
+
+
+	<select id="member_view" resultType="member.dto.MemberDTO">
+	select user_id, user_type, name, gender, zipcode, address1, address2, email, tel1, tel2, birthdate
+	from users
+	where user_id = #{user_id}
+	</select>
+	
+	
+	<select id="student_view" resultType="member.dto.StudentDTO">
+	select student_id, dept_name, status, grade 
+	from students s
+	inner join dept d on s.dept_id = d.dept_id
+	where user_id=#{user_id}
+	</select>
+	
+	<select id="professor_view" resultType="member.dto.ProfessorDTO">
+	select professor_id, dept_name, rank 
+	from professors p
+	inner join dept d on p.dept_id = d.dept_id;
+	where user_id=#{user_id}
+	</select>
+	
+
+</mapper>

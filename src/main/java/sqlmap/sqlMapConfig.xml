@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 알리아스 설정 -->
+	<typeAliases>
+		<typeAlias type="notice.dto.NoticeDTO" alias="n"/>
+		<typeAlias type="book.dto.BookDTO" alias="b"/>
+		<typeAlias type="book.dto.CopyDTO" alias="c"/>			
+	</typeAliases>
+	<!-- db연결 참조코드(context.xml과 연결됨) -->
+	<environments default="">
+		<environment id="">
+			<transactionManager type="JDBC" />
+			<dataSource type="JNDI">
+				<property name="data_source" 
+					value="java:comp/env/oraDB" />
+			</dataSource>
+		</environment>
+	</environments>
+	<!-- 실제 sql query -->
+	<mappers>
+		<mapper resource="/notice/mapper/notice.xml"/>
+		<mapper resource="/member/mapper/member.xml"/>		
+		<mapper resource="/book/mapper/book.xml"/>		
+		<mapper resource="/book/mapper/copy.xml"/>
+		<mapper resource="/circulate/mapper/circulate.xml"/>
+		<mapper resource="/work/mapper/work.xml"/>		
+	</mappers>
+	
+</configuration>
