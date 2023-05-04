@@ -27,6 +27,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<mapper resource="/book/mapper/copy.xml"/>
 		<mapper resource="/circulate/mapper/circulate.xml"/>
 		<mapper resource="/work/mapper/work.xml"/>		
+		<mapper resource="/admin/mapper/admin.xml"/>	
 	</mappers>
 	
 </configuration>

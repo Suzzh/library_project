@@ -2,11 +2,15 @@ package member;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.jdt.internal.compiler.classfmt.NonNullDefaultAwareTypeAnnotationWalker;
+
+import book.dto.BookDTO;
 import circulate.dao.CirculateDAO;
 import circulate.dto.CheckoutDTO;
 import member.dao.MemberDAO;
@@ -91,7 +98,22 @@ public class MemberServlet extends HttpServlet {
 			
 
 			if(dto!=null) {
-				dto = dao.setCheckoutStatus(dto);
+				dto = dao.view(user_id);
+				
+				Map<String, Object> checkoutsMap = CirculateDAO.getCheckout(user_id);
+				
+				int numCheckedOut = Integer.parseInt(String.valueOf(checkoutsMap.get("CHECKOUTS")));
+				int numLateReturns = Integer.parseInt(String.valueOf(checkoutsMap.get("LATE_RETURNS")));
+
+				dto.setNumCheckedOut(numCheckedOut);
+				dto.setNumLateReturns(numLateReturns);
+				
+				if(numCheckedOut > Library.getMaxBorrow(dto.getUser_type()) || numLateReturns >= 1) {
+					dto.setCheckout_status("대출불가");
+				}
+				
+				else dto.setCheckout_status("정상");
+				
 				request.setAttribute("dto", dto);
 				page = "/checkout/checkout2.jsp";
 				RequestDispatcher rd = request.getRequestDispatcher(page);
@@ -107,7 +129,7 @@ public class MemberServlet extends HttpServlet {
 		}
 		
 		
-		else if(uri.indexOf("myCheckouts.do")!=-1) {
+		else if(uri.indexOf("myBorrowedBooks.do")!=-1) {
 			
 			Long user_id = null;
 			String page = "";
@@ -118,13 +140,47 @@ public class MemberServlet extends HttpServlet {
 			}
 			
 			user_id = (Long)(session.getAttribute("user_id"));
+			
 	
 			MemberDTO dto = new MemberDTO();
-			dto.setUser_id(user_id);
+			CirculateDAO circulateDAO = new CirculateDAO();
 
-			dto = dao.setCheckoutStatus(dto);
+			dto.setUser_id(user_id);
+			
+			String user_type = dao.getUserType(user_id);
+			dto.setUser_type(user_type);
+
+			List<CheckoutDTO> borrowedBooks = dao.getBorrowedBooks(user_id);
+			
+			int numCheckedOut = 0;
+			int numLateReturns = 0;
+			
+			if(borrowedBooks!=null) {
+				numCheckedOut = borrowedBooks.size();
+				for(CheckoutDTO b : borrowedBooks) {
+					Date tmp = b.getDue_date();
+					Date due_date = new Date(tmp.getYear(), tmp.getMonth(), tmp.getDay()+1,0,0);
+					Date now = new Date();
+					if(due_date.compareTo(now)<=0) {
+						//연체일 구해서 setting
+						numLateReturns++;
+					}
+				}
+				}
+			
+			
+			dto.setNumCheckedOut(numCheckedOut);
+			dto.setNumLateReturns(numLateReturns);
+			
+			if(numCheckedOut > Library.getMaxBorrow(dto.getUser_type()) || numLateReturns >= 1) {
+				dto.setCheckout_status("대출불가");
+			}
+			
+			else dto.setCheckout_status("정상");
+				
 			request.setAttribute("dto", dto);
-			page = "/mylibrary/issue.jsp";
+			request.setAttribute("list", borrowedBooks);
+			page = "/mylibrary/borrowed.jsp";
 			RequestDispatcher rd = request.getRequestDispatcher(page);
 			rd.forward(request, response);
 

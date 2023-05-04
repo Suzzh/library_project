@@ -135,8 +135,8 @@
         <div class="writeBox">
             <div><input type="checkbox" name="fix" id="fix"><label for="fix">상단고정</label></div>
             <div>
-                <select name="post_category">
-                    <option>분류</option>
+                <select name="post_category" id="post_category">
+                    <option value="">분류</option>
                     <option value="일반">일반</option>
                     <option value="시설">시설</option>
                     <option value="학술정보">학술정보</option>

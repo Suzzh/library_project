@@ -71,7 +71,7 @@
 
 
     .search-box select{
-       width: 25%;
+       width: 22%;
        height: 29px;
        font-size: 15px;
        padding-left: 5px;
@@ -80,7 +80,7 @@
 
      .search-box input[type="text"]{
      	height: 25px;
-        width: 55%;
+        width: 50%;
         font-size: 15px;
         padding-left: 1%;
         border: #7a7f80 1px solid;
@@ -88,7 +88,7 @@
 
 
       .search-box input[type="submit"]{
-        width: 15%;
+        width: 18%;
         height: 30px;
         font-size: 15px;
         background-color: #042d04;
@@ -280,8 +280,8 @@
       	</c:otherwise>
       </c:choose>      
         <td class="to_notice">[${dto.post_category}] 
-        <a href="<%=request.getContextPath()%>/notice_servlet/view.do?id=${dto.id}&category=${category}&curPage=${page.curPage}">${dto.title}</a></td>
-        <td>${dto.writer}</td>
+        <a href="<%=request.getContextPath()%>/notice_servlet/view.do?notice_id=${dto.notice_id}&category=${category}&curPage=${page.curPage}">${dto.title}</a></td>
+        <td>${dto.dept_name}</td>
         <td><fmt:formatDate value="${dto.post_date}" pattern="yyyy-MM-dd"/></td>
         <td>${dto.view_count}</td>
         <td></td>
@@ -290,7 +290,10 @@
       </tbody>
       </table>
     </div>
-    <button type="button" id="addNotice" onclick="location.href='${path}/board/write.jsp'">글쓰기</button>
+    
+    <c:if test="${sessionScope.admin_id!=null}">
+    <button type="button" id="addNotice" onclick="location.href='${path}/notice/write.jsp'">글쓰기</button>
+    </c:if>
 
     <div class="noticePaging">
     <c:if test="${page.curPage > 1}">

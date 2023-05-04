@@ -5,11 +5,15 @@
 
 <mapper namespace="member">
 
-
 	<select id="loginCheck" resultType="String">
 	select name from users
 	where user_id=#{user_id} and passwd=#{passwd}
+	</select>
 	
+	
+	<select id="getUserType" resultType="String">
+	select user_type from users
+	where user_id=#{user_id}
 	</select>
 
 
@@ -33,6 +37,19 @@
 	inner join dept d on p.dept_id = d.dept_id;
 	where user_id=#{user_id}
 	</select>
-	
+
+
+	<select id="getBorrowedBooks" resultType="circulate.dto.CheckoutDTO">
+	select b.title, c.checkout_date, coalesce(c.renewal_date,c.due_date) as due_date, c.renewal_count,
+	listagg(a.author_name, ';') within group (order by ba.preference desc, a.author_id) as authornames
+	from checkout c
+	join books b on c.isbn = b.isbn
+	join book_author ba on c.isbn = ba.isbn
+	join author a on ba.author_id = a.author_id
+	where c.return_date is null and c.user_id = #{user_id} and ba.author_type = '지음'
+	group by b.title, c.checkout_date, c.due_date, c.renewal_date, c.renewal_count
+	order by checkout_date desc
+	</select>
+
 
 </mapper>

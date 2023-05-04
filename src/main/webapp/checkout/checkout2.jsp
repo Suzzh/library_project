@@ -142,7 +142,7 @@
     }
     
     .prohibited{
-      background-color: #FFE4E1;
+      background-color: rgba(246, 233, 245, 0.9);
     }
 
     #btnChangeDueDate, #btnCheckout, #btnDelete, #btnReset, #btnSearchBook{

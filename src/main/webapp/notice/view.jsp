@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 
 <!DOCTYPE html>
@@ -118,7 +119,9 @@
   <div class="contentsMain">
     <div class="notice_view">
       <div class="title"><h3>[${dto.post_category}] ${dto.title}</h3></div>
-      <div class="detail"><div>${dto.writer}</div><div>2023-02-28</div><div>조회: ${dto.view_count}</div></div>
+      <div class="detail"><div>${dto.dept_name}</div>
+      <div><fmt:formatDate value="${dto.post_date}" pattern="yyyy-MM-dd"/></div>
+      <div>조회: ${dto.view_count}</div></div>
       <div class="notice_content">${dto.notice_content}</div>
       <button onclick="location.href='${path}/notice_servlet/board.do?category=${category}&curPage=${curPage}'" id="toList">목록</button>
     </div>

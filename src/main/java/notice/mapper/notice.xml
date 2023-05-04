@@ -6,32 +6,36 @@
 <mapper namespace="notice">
 
 	<insert id="write" parameterType="notice.dto.NoticeDTO">
-	insert into notice (id, writer, title, notice_content, post_category, fix, filesize, filename)  
-	values (notice_id_seq.nextval, #{writer}, #{title}, #{notice_content}, #{post_category}, #{fix}, #{filesize}, #{filename})	
+	insert into notice (notice_id, writer_id, dept_in_charge, title, notice_content, post_category, fix)  
+	values (notice_id_seq.nextval, #{writer_id}, #{dept_in_charge}, #{title}, #{notice_content}, #{post_category}, #{fix})	
 	</insert>
 
 	<select id="list" resultType="notice.dto.NoticeDTO">
-	select * 
+	select result.*, d.dept_name 
     from
     (select rownum rn, a.*
 	from (select * from notice
     <if test="category!=null and category!=''">
 	where post_category = #{category}
 	</if>
-	order by fix desc, id desc) a)
+	order by fix desc, notice_id desc) a) result
+	join lib_dept d on dept_in_charge = d.dept_id
     where rn between #{start} and #{end}
 	</select>
 
 
+
 	<select id="view" parameterType="int" resultType="notice.dto.NoticeDTO">
-	select * from notice where id = #{id}
+	select n.*, d.dept_name
+	from notice n
+	join lib_dept d on n.dept_in_charge = d.dept_id
+	where notice_id = #{notice_id}
 	</select>
 	
 	<update id="updateViewCount" parameterType="int">
-	update
+	update notice
 	set view_count = view_count+1
-	where id=#{id}
-	
+	where notice_id = #{notice_id}
 	</update>
 	
 	<select id="count" resultType="int">

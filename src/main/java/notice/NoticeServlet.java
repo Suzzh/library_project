@@ -9,7 +9,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 
+import admin.dao.AdminDAO;
 import notice.dao.NoticeDAO;
 import notice.dto.NoticeDTO;
 import work.Pager;
@@ -62,9 +65,23 @@ public class NoticeServlet extends HttpServlet {
 			String filename = "";
 			int filesize = 0;
 			
+			HttpSession session = request.getSession();
+			
+			long admin_id = 0;
+			try {
+				admin_id = (Long)session.getAttribute("admin_id");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			//필터 등 이용해서 id없으면 뒤로 보내기
+			
 			NoticeDTO dto = new NoticeDTO();
 			
-			dto.setWriter("관리자");
+			dto.setWriter_id(admin_id);
+			
+			AdminDAO adminDAO = new AdminDAO();
+			String dept_in_charge = adminDAO.getDept(admin_id);
+			dto.setDept_in_charge(dept_in_charge);
 			dto.setTitle(request.getParameter("title"));
 			dto.setNotice_content(request.getParameter("notice_content"));
 			dto.setPost_category(request.getParameter("post_category"));
@@ -78,15 +95,19 @@ public class NoticeServlet extends HttpServlet {
 			dto.setFix(fixyn);
 			
 			dao.writeBoard(dto);
-			String page = request.getContextPath()+"/notice/board.jsp";
+			String page = request.getContextPath()+"/notice/board.do";
 			response.sendRedirect(page);
 				
 		}
 		
 		else if(uri.indexOf("view.do")!=-1) {
+
 			NoticeDTO dto = new NoticeDTO();
-			int id = Integer.parseInt(request.getParameter("id"));
-			dto = dao.viewNotice(id);
+			int notice_id = Integer.parseInt(request.getParameter("notice_id"));
+			
+			System.out.println("notice_id" + notice_id);
+			
+			dto = dao.viewNotice(notice_id);
 			request.setAttribute("dto", dto);
 			if(request.getParameter("curPage")!=null) request.setAttribute("curPage", request.getParameter("curPage"));
 			if(request.getParameter("category")!=null) request.setAttribute("category", request.getParameter("category"));

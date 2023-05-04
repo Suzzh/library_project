@@ -89,8 +89,9 @@ div{
     /*color: #0f2f44;*/
 }
 
-#toMenu{
+.toMenu{
 	text-decoration: none;
+	color: black;
 }
 
 .nav{

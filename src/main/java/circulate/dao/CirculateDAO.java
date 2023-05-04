@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 
+import book.dto.BookDTO;
 import book.dto.CopyDTO;
 import circulate.dto.CheckoutDTO;
 import sqlmap.MybatisManager;
@@ -127,7 +128,7 @@ public class CirculateDAO {
 		}
 		return reservNum;
 	}
-	
+
 
 
 }

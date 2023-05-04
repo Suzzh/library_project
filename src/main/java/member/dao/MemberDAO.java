@@ -1,13 +1,17 @@
 package member.dao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 
 import org.apache.ibatis.session.SqlSession;
 
+import book.dto.BookDTO;
 import circulate.dao.CirculateDAO;
+import circulate.dto.CheckoutDTO;
 import member.dto.MemberDTO;
 import member.dto.ProfessorDTO;
 import member.dto.StudentDTO;
@@ -61,26 +65,33 @@ public class MemberDAO {
 			
 			return name;
 		}
-		
-		
 
-		public MemberDTO setCheckoutStatus(MemberDTO dto) {
-			
-			//아예 checkoutDTO들을 받아오는걸로 바꾸기 ~ 범용성있게
-			Map<String, Object> checkoutsMap = CirculateDAO.getCheckout(dto.getUser_id());
-			
-			int numCheckedOut = Integer.parseInt(String.valueOf(checkoutsMap.get("CHECKOUTS")));
-			int numLateReturns = Integer.parseInt(String.valueOf(checkoutsMap.get("LATE_RETURNS")));
+		public List<CheckoutDTO> getBorrowedBooks(Long user_id) {
+			List<CheckoutDTO> borrowedBooks = null;
+			 
+				try(SqlSession session = MybatisManager.getInstance().openSession()) {
+					
+					borrowedBooks = session.selectList("member.getBorrowedBooks", user_id);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			return borrowedBooks;
+		}
 
-			dto.setNumCheckedOut(numCheckedOut);
-			dto.setNumLateReturns(numLateReturns);
+		public String getUserType(Long user_id) {
+			String user_type = "";
 			
-			if(numCheckedOut > Library.getMaxBorrow(dto.getUser_type()) || numLateReturns >= 1) {
-				dto.setCheckout_status("대출불가");
+			try(SqlSession session = MybatisManager.getInstance().openSession()) {
+				
+				user_type = session.selectOne("member.getUserType", user_id);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			
-			else dto.setCheckout_status("정상");
-			
-			return dto;
+			return user_type;
 		}
+
+		
 }

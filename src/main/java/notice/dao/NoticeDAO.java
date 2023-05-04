@@ -29,9 +29,9 @@ public class NoticeDAO {
 	}
 
 	
-	
-	
 	public List<NoticeDTO> boardList(String category, int start, int end) {
+		
+		//관리자 로그인 시 부서명이 아닌 사람이름이 보일 수 있게 수정
 		
 		try (SqlSession session = MybatisManager.getInstance().openSession()) {
 			switch(category) {
@@ -56,13 +56,13 @@ public class NoticeDAO {
 	}
 
 
-	public NoticeDTO viewNotice(int id) {
+	public NoticeDTO viewNotice(int notice_id) {
 		
 		NoticeDTO dto = null;
 		
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
-			session.update("notice.updateViewCount", id);
-			dto = session.selectOne("notice.view", id);
+			session.update("notice.updateViewCount", notice_id);
+			dto = session.selectOne("notice.view", notice_id);
 			session.commit();
 			session.close();
 

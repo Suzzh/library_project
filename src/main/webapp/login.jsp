@@ -118,11 +118,31 @@
   </style>
 
   <script>
-
+  
+  
     $(function(){
     	
+    	$('input[name=login_type]').change(function(){
+    		
+    		if($("input[name=login_type]:checked").val()=="admin"){
+    			$("#id").attr("placeholder", "관리자 ID");
+    			$("#passwd").attr("placeholder", "관리자 비밀번호");
+    		}
+    		
+    		else{
+    			$("#id").attr("placeholder", "학사포탈시스템 ID(학번)");
+    			$("#passwd").attr("placeholder", "학사포탈시스템 비밀번호");    			
+    		}
+    		
+    	});
 
-      $("#loginBtn").click(function(){
+
+
+    });
+    
+    
+    
+    function gotoLogin(){
       	let id = $("#id").val();
       	//5~10자리 숫자 입력하지 않으면 에러
       	let exp1 = /^\d{5,10}$/;
@@ -134,18 +154,24 @@
           return false;
         }
 
-
         if($("#passwd").val()==""){
           $("#errorMessage").css("display", "block");
           $("#errorMessage").html("※ 비밀번호를 입력해 주세요.");
           $("#passwd").focus();
           return false;
         }
-        return true;
-      });
-
-
-    });
+        
+		if($("input[name=login_type]:checked").val()=="admin"){
+			document.loginForm.action = "${path}/admin_servlet/login.do";
+			document.loginForm.submit();
+		}
+		
+		else{
+			document.loginForm.action = "${path}/member_servlet/login.do";
+			document.loginForm.submit();
+		}
+        
+    }
 
 
 
@@ -171,8 +197,14 @@
   </div>
   <div class="contentsMain">
   <div class="login-box">
+     <div>
+      <input type="radio" name="login_type" value="student" checked="checked" id="std_radio">
+      <label for="std_radio">학생 로그인</label>
+      <input type="radio" name="login_type" value="admin" id="admin_radio">
+      <label for="admin_radio">관리자 로그인</label>
+     </div>
     <div class="login-box-main">
-      <form method="post" class="loginForm" action="${path}/member_servlet/login.do">
+      <form method="post" class="loginForm" name="loginForm">
 <!--        <div class="formUpper">-->
 <!--          <input type="radio" name="loginType" value="portal" id="portal" checked><label for="portal">재학생/교직원</label>-->
 <!--          <input type="radio" name="loginType" value="patron" id="patron"><label for="patron">도서관회원</label></div>-->
@@ -180,14 +212,14 @@
       <div>
         <div class="form-label">
           <label for="id">아이디</label>
-          <input type="text" id="id" name="id" autofocus placeholder="지혜포탈시스템 ID(학번, 사번)">
+          <input type="text" id="id" name="id" autofocus placeholder="학사포탈시스템 ID(학번)">
         </div>
         <div class="form-label">
           <label for="passwd">비밀번호</label>
-          <input type="password" id="passwd" name="passwd" placeholder="지혜포탈시스템 비밀번호">
+          <input type="password" id="passwd" name="passwd" placeholder="학사포탈시스템 비밀번호">
       </div>
       </div>
-        <input type="submit" id="loginBtn" value="로그인">
+        <button type="button" id="loginBtn" onClick="gotoLogin()">로그인</button>
       </div>
       </form>
     </div>
@@ -206,9 +238,9 @@
     </div>
     <div id="loginDesc">
       <ul>
-        <li>지혜포탈시스템의 ID(학번, 사번)와 비밀번호로 로그인해주세요.</li>
-        <li>계정 분실 시 학사/교직원 포탈시스템에서 확인해주세요.</li>
-        <li>졸업생은 <a href="#">회원제 서비스 가입</a> 후 로그인해 해주세요.<br>
+        <li>학사포탈시스템의 ID(학번)와 비밀번호로 로그인해주세요.</li>
+        <li>계정 분실 시 학사포탈시스템에서 확인해주세요.</li>
+        <!-- <li>졸업생은 <a href="#">회원제 서비스 가입</a> 후 로그인해 해주세요.<br> -->
         </li>
         <li>기타 문의: 학술자료운영팀 (02-1234-5678)</li>
       </ul>

@@ -1,5 +1,8 @@
+<%@page import="work.Library"%>
+<%@page import="member.dto.MemberDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 
 <!DOCTYPE html>
@@ -264,11 +267,14 @@
         <ul>
           <li>
             <div>상태</div>
-            <div>정상</div>
+            <div>${dto.checkout_status}</div>
           </li>
           <li>
             <div>대출도서</div>
-            <div>2/15</div>
+            <%  
+            MemberDTO dto = (MemberDTO)request.getAttribute("dto");
+            int max_borrow = Library.getMaxBorrow(dto.getUser_type()); %>
+            <div>${dto.numCheckedOut}/<%=max_borrow%></div>
           </li>
           <li>
             <div>예약도서</div>
@@ -276,7 +282,7 @@
           </li>
           <li>
             <div>연체도서</div>
-            <div>0</div>
+            <div>${dto.numLateReturns}</div>
             <!--얘네 클릭해서 정보 확인하거나 가져올 수 있게-->
           </li>
         </ul>
@@ -285,7 +291,6 @@
 <!--          <li>분실도서 0건이 있습니다.</li>-->
 <!--        </ul>-->
       </div>
-
 
     <div class="boardCategory">
       <div onclick="location.href='https://www.google.com/'">대출현황/연장</div>
@@ -347,86 +352,24 @@
         <th>No.</th>
         <th>도서정보</th>
         <th>대출일</th>
-        <th>반납예정일</th>
+        <th>반납기한</th>
         <th>연체일수</th>
         <th>연장횟수</th>
       </tr>
       </thead>
       <tbody>
-<!--      <img src="https://image.yes24.com/goods/90051766/XL">-->
-<!--      <div>달러구트 꿈 백화점 : 주문하신 꿈은 매진입니다 : 이미예 장편소설 / 이미예 지음</div>-->
-<!--      </li>-->
-<!--      <li>-->
-<!--        <img src="https://image.yes24.com/Goods/108887930/XL">-->
-<!--        <div>작별인사 : 김영하 장편소설 / 김영하 지음</div>-->
-<!--      </li>-->
-<!--      <li>-->
-<!--        <img src="https://kr.object.ncloudstorage.com/changbi/images/2023/2/230202_ad376051-ab18-4a44-9ab8-a68d4819de97.jpg">-->
-<!--        <div>러브 몬스터 : 이두온 장편소설 / 이두온 지음</div>-->
-<!--      </li>-->
-<!--      <li>-->
-<!--        <img src="https://image.yes24.com/goods/90051766/XL">-->
-<!--        <div>달러구트 꿈 백화점 : 주문하신 꿈은 매진입니다 : 이미예 장편소설 /이미예 지음</div>-->
-<!--      </li>-->
-<!--      <li>-->
-<!--        <img src="https://image.yes24.com/goods/76106687/XL">-->
-<!--        <div>지구에서 한아뿐 : 정세랑 장편소설 / 정세랑 지음</div>-->
-<!--        -->
-      <tr>
+      <c:forEach var="row" items="${list}">
+        <tr>
         <td><input type="checkbox" name="renewCheck"></td>
         <td>1</td>
         <td>
-          달러구트 꿈 백화점 : 주문하신 꿈은 매진입니다 : 이미예 장편소설 / 이미예 지음</td>
-        <td>2023-02-21</td>
-        <td>2023-03-04</td>
+          ${row.title} / 이미예 지음</td>
+        <td><fmt:formatDate value="${row.checkout_date}" pattern="yyyy-MM-dd"/></td>
+        <td><fmt:formatDate value="${row.due_date}" pattern="yyyy-MM-dd"/></td>
         <td>0</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" name="renewCheck"></td>
-        <td>2</td>
-        <td>지구에서 한아뿐 : 정세랑 장편소설 / 정세랑 지음</td>
-        <td>2023-02-21</td>
-        <td>2023-03-04</td>
-        <td>0</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" name="renewCheck"></td>
-        <td>2</td>
-        <td>지구에서 한아뿐 : 정세랑 장편소설 / 정세랑 지음</td>
-        <td>2023-02-21</td>
-        <td>2023-03-04</td>
-        <td>0</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" name="renewCheck"></td>
-        <td>2</td>
-        <td>지구에서 한아뿐 : 정세랑 장편소설 / 정세랑 지음</td>
-        <td>2023-02-21</td>
-        <td>2023-03-04</td>
-        <td>0</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" disabled></td>
-        <td>3</td>
-        <td>러브 몬스터 : 이두온 장편소설 / 이두온 지음</td>
-        <td>2023-02-08</td>
-        <td>2023-03-04</td>
-        <td>0</td>
-        <td>1</td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" disabled></td>
-        <td>3</td>
-        <td>러브 몬스터 : 이두온 장편소설 / 이두온 지음</td>
-        <td>2023-02-08</td>
-        <td>2023-03-04</td>
-        <td>0</td>
-        <td>1</td>
-      </tr>
+        <td>${row.renewal_count}</td>
+      </tr>    
+      </c:forEach>
       </tbody>
     </table>
 
