@@ -1,10 +1,10 @@
+<%@page import="work.Copy"%>
 <%@page import="work.Pager"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:set var="path" value="${pageContext.request.contextPath}"/>
 <%@page import="java.util.stream.Collectors"%>
 <%@page import="book.dto.FilterDTO"%>
-<%@page import="book.dto.Book_AuthorDTO"%>
 <%@page import="java.util.List"%>
 <%@page import="book.dto.BookDTO"%>
 <%@ page import="java.util.ArrayList" %>
@@ -93,7 +93,6 @@
                 height: 35px;
                 font-size: 16px;
                 background-color: #042d04;
-                /*background-color: rgb(19, 78, 110);*/
                 color: white;
                 border: none;
                 border-radius: 4px;
@@ -111,7 +110,6 @@
                 border: none;
                 border-radius: 4px;
                 background-color: #bcce3c;
-                /*background-color: yellowgreen;*/
                 font-size: 16px;
                 cursor: pointer;
 
@@ -130,10 +128,8 @@
             }
 
             .filterUpper{
-                /*border-bottom: 1px solid black;*/
                 min-height: 40px;
                 line-height: 40px;
-                /*이부분 수정해야 함*/
             }
 
 
@@ -156,19 +152,11 @@
 		      margin-left: 3px;
 		    }
 
-            /*.filterBody div:first-child{*/
-            /*  background-color: #dcdcdc;*/
-            /*}*/
-
             .filterBody div{
                 line-height: 2em;
                 padding: 0 14px 8px 14px;
             }
 
-            /*.filterBody h2{*/
-            /*  padding: 15px 0 10px 14px;*/
-            /*  margin: 0 -10px;*/
-            /*}*/
 
             .filterBody h3{
                 margin: 0 -14px 8px -14px;
@@ -192,11 +180,9 @@
                 width: 90%;
                 margin: 20px auto 10px auto;
                 background-color: #eceeee;
-                /*background-color: #bcce3c;*/
             }
 
             #range .ui-slider-range {
-                /*background-color: rgba(0, 0, 0, 0.3);*/
                 background-color: rgb(188, 206, 60);
                 height: 100%;
                 margin: 0;
@@ -270,6 +256,7 @@
           	    border: 1px #bbc4c7 solid;
             }
 
+            
             .searchedBookDetails{
                 flex-grow: 1;
                 display: flex;
@@ -318,13 +305,11 @@
             }
 
             .bookStatus_ok{
-                /*color: #0077be;*/
                 color: #2e86c1;
             }
 
             .bookStatus_no{
                 color: #ff3f34;
-                /*color: #d90202;*/
             }
 
             .bookStatus_wait{
@@ -363,40 +348,20 @@
 		    	font-weight: bold;
 		    }
             
-
-
-		
-    /*@media screen and (max-width: 725px) {*/
-    /*  .search-box div{*/
-    /*    min-width: auto;*/
-    /*    width: 90%;*/
-    /*  }*/
-    
-    /*  .resultListUpper{*/
-    /*    flex-direction: column;*/
-    /*  }*/
-    
-    /*  #bookSearchinnerBox a{*/
-    /*    display: inline;*/
-    /*  }*/
-    
-    /*  .bookSearch button{*/
-    /*    display: none;*/
-    /*  }*/
-    
-    /*  #bookSearchinnerBox{*/
-    /*    padding-right: 0px;*/
-    /*  }*/
-    
-    /*}
 		    
 		    
         </style>
 
 
         <script>
+        
+        window.onpageshow = function (event) {
+        	$("form[name='filter_form']").find("input").attr("disabled", false);
+        }
+        
 
             $(function(){
+
             	
                 $(window).scroll(function(){
                     let position = $(window).scrollTop();
@@ -451,18 +416,18 @@
             
             
             function submitfilter(option, keyword){
-
-                let opt = $("#new_opt");
-                opt.attr("name", "exact_option");
-                opt.val(option);
-
-                let filter = $("#new_filter");
-                filter.attr("name", "exact_keyword");
-                filter.val(keyword);
-
-                $("#type").val('keyAndExact');
-
-                document.filter_form.submit();
+            	
+            	$("#curPage").attr("disabled", true);
+            	$("#type").attr("disabled", true);
+            	
+            	let data = {
+            			'exact_option': option,
+            			'exact_keyword': keyword,
+            			'type': 'keyAndExact'
+            	};
+            	
+            	let queryString = $("form[name='filter_form']").serialize() + '&' + $.param(data);
+            	location.href="${path}/book_servlet/search.do?" + queryString;
 
             }
 
@@ -470,27 +435,20 @@
             function search(){
 
                 let option = $("#option").val();
-                let keyword = $("#keyword").val();
-
+                let keyword = $("#keyword").val().trim();
+                
+                $("#curPage").attr("disabled", true);
                 if($("#inSearch").is(":checked")){
-                    let opt = $("#new_opt");
-                    opt.attr("name", "option");
-                    opt.val(option);
-                    let filter = $("#new_filter");
-                    filter.attr("name", "keyword");
-                    filter.val(keyword);
-
-                    let type = '${type}';
-                    if(type == 'key'){
-                        $("#type").val('key');
-                    }
-                    else{
-                    	$("#type").val('keyAndExact');
-                    }
-
-                    document.filter_form.submit();
-
-                }
+                	
+                	let data = {
+                			'option': option,
+                			'keyword': keyword
+                	};
+                	
+                	let queryString = $("form[name='filter_form']").serialize() + '&' + $.param(data);
+                	location.href = "${path}/book_servlet/search.do" + '?' + queryString;
+                	
+                 }
 
                 else{
                     document.bookSearchForm.submit();
@@ -500,17 +458,54 @@
 
 
             function list(curPage){
+            	
+            	$("#curPage").attr("disabled", true);
+            	
+            	let queryString = $("form[name='filter_form']").serialize() + '&curPage=' + curPage;
+            	location.href="${path}/book_servlet/search.do?" + queryString;
 
-                let type = '${type}';
-                $("#type").val(type);
-                $("#curPage").val(curPage);
-                let opt = $("#new_opt");
-                opt.remove();
-                let filter = $("#new_filter");
-                filter.remove();
-
-                document.filter_form.submit();
             }
+            
+            
+            
+            function sortSubmit(){
+            	
+            	let new_sort = $('select[name="sort"]').val();
+            	let new_order = $('select[name="order"]').val();
+            	let new_page_size = $('select[name="page_size"]').val()
+            	
+            	
+            	if(new_sort == '' || new_order == ''){
+                	$("#page_size").attr("disabled", true);
+                	$("#curPage").attr("disabled", true);
+                	
+                	let queryString = $("form[name='filter_form']").serialize();
+                	location.href = "${path}/book_servlet/search.do?" + queryString + '&page_size=' + new_page_size;
+       
+            	}
+            	
+            	
+            	else{
+            		$("#page_size").attr("disabled", true);
+                	$("#curPage").attr("disabled", true);
+                	$("#sort").attr("disabled", true);
+                	$("#order").attr("disabled", true);
+                	
+                	let data = {
+                			'sort': new_sort,
+                			'order': new_order,
+                			'page_size': new_page_size
+                	};
+
+                	let queryString = $("form[name='filter_form']").serialize() + '&' + $.param(data);
+                	location.href="${path}/book_servlet/search.do?" + queryString;
+                	
+            	}
+            	            	
+         	
+            }
+
+            	
 
             
 
@@ -533,16 +528,12 @@
         홈 &gt 도서검색
     </div>
     <div class="contentsMain">
-    
-    
-    
-    
-		  <div class="search-box">
+    	  <div class="search-box">
 		    <form name="bookSearchForm" class="bookSearch" method="get" action="${path}/book_servlet/search.do">
 		      <div id="bookSearchinnerBox">
 		        <div>
 		          <input type="checkbox" name="inSearch" value="true" id="inSearch"><label for="inSearch">결과 내 재검색</label>
-		          <a href="{path}/book/search.jsp">상세검색</a>
+		          <a href="{path}/main_servlet/searchForm.do">상세검색</a>
 		        </div>
 		        <div>
 		          <select id="option" name="option">
@@ -555,7 +546,7 @@
 		          <input type="text" name="keyword" size="30" id="keyword">
 		          <button type="button" onclick="search()" id="btnSearch">검색</button>
 		        </div>
-		        <button type="button" onclick="location.href='${path}/book/search.jsp'" id="btnRedirect">상세검색</button>
+		        <button type="button" onclick="location.href='${path}/main_servlet/searchForm.do'" id="btnRedirect">상세검색</button>
 		      </div>
 		    </form>
 		  </div>
@@ -592,7 +583,7 @@
                 %>                
                     <span>${(page.curPage-1)*page.page_scale+1}-${(page.curPage-1)*page.page_scale+books.size()}건 출력 / 총 ${size}건</span>
                 </div>
-           <form name="filter_form" action="${path}/book_servlet/search.do">
+           <form name="filter_form">
                 <div class="filterBody">
                     <div>
                         <h3>제한된 항목</h3>
@@ -654,13 +645,12 @@
                         	</c:if>
                         </c:forEach>
                         </ul>
-                        <input type="hidden" name="sort" value="${sort}">
-                        <input type="hidden" name="order" value="${order}">
-                        <input type="hidden" name="publishEnd" value="${publishStart}">
-                        <input type="hidden" name="publishEnd" value="${publishEnd}">
+                        <input type="hidden" name="sort" id="sort" value="${sort}">
+                        <input type="hidden" name="order" id="order" value="${order}">
+                        <input type="hidden" name="publishStart" id="publishStart" value="${publishStart}">
+                        <input type="hidden" name="publishEnd" id="publishEnd" value="${publishEnd}">
                         <input type="hidden" name="type" id="type" value="${type}">
-                        <input type="hidden" name="option" id="new_opt">
-                        <input type="hidden" name="keyword" id="new_filter">                        
+                        <input type="hidden" name="page_size" id="page_size" value="${page_size}">
                         <input type="hidden" name="curPage" id="curPage" value="${page.curPage}">   
                         </div>
                     
@@ -705,7 +695,8 @@
                         });
                     	
                     });
-                    
+
+
                     </script>
                     
                     <div>
@@ -775,82 +766,74 @@
                             <input type="checkbox" id="selectAllCheck">
                             <label for="selectAllCheck">전체선택</label><button type="button">내 서재에 담기</button>
                         </div>
+                        
+                        <!-- 기존거 유지하게 수정해야 함 -->
                         <div id="sorting">
-                            <select>
-                                <option selected>10</option>
-                                <option>20</option>
-                                <option>30</option>
-                                <option>50</option>
-                                <option>100</option>
+                            <select name="page_size">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
                             </select>
-                            <select>
-                                <option selected>정렬항목</option>
-                                <option>서명</option>
-                                <option>저자명</option>
-                                <option>출판년</option>
-                                <option>입수일</option>
-                                <!-- <option>대출횟수</option> -->
+                            <select name="sort">
+                                <option value="" selected>정렬항목</option>
+                                <option value="title">서명</option>
+                                <option value="main_author">저자명</option>
+                                <option value="publication_year">출판년도</option>
+                                <option value="register_date">등록일</option>
                             </select>
-                            <select>
-                                <option selected>정렬</option>
-                                <option>오름차순</option>
-                                <option>내림차순</option>
+                            <select name="order">
+                                <option value="" selected>정렬</option>
+                                <option value="asc">오름차순</option>
+                                <option value="desc">내림차순</option>
                             </select>
-                            <button type="button">정렬</button>
+                            <button type="button" onclick="sortSubmit()">정렬</button>
                         </div>
                     </div>
                     
                     
                     <ul class="resultList">
-                        <%
-                        
-                        List<BookDTO> books = (List<BookDTO>)request.getAttribute("books");
-                        Pager pager = (Pager)request.getAttribute("page");    		
-                        
-                        for(int i=0; i<books.size(); i++){
-                        	BookDTO book = (BookDTO) books.get(i);
-                        	String title = book.getTitle();
-                        	String publisher_name = book.getPublisher_name();
-                        	int publication_year = book.getPublication_year();
-                        	long isbn = book.getIsbn();
-                        	String img_url = book.getImg_url();
-                        	
-                        	String authorNames = book.getAuthorNames();
-                        	String authors[] = authorNames.split(";");
-                        	
-                        	
-                        %>
-
+                    
+                    <c:forEach var="book" items="${books}" varStatus="status">
                         <li>
                             <div class="searchedBook">                            
-                                <span><input type="checkbox" value="등록번호" name="toMyBookCheck"><%=(pager.getCurPage()-1)*pager.getPage_scale()+i+1%>.</span>
-                                <a href="#" onclick="location.href='${path}/book_servlet/view.do?isbn=<%=isbn%>'" >
-                                <%if(img_url!="" && img_url!=null) {%>
-                                <img src="<%=img_url%>">
-                                <% } else {%>
-                                <img src="${path}/include/default_book.png">
-                                <%}%>
+                                <span><input type="checkbox" value="등록번호" name="toMyBookCheck">
+                                <c:set var="num" value="${(page.curPage-1)*page.page_scale+status.count}"/>
+                                ${num}.</span>
+                                <a href="#" onclick="location.href='${path}/book_servlet/view.do?isbn=${book.isbn}'" >
+                                <c:choose>
+                                	<c:when test="${book.img_url!=null && book.img_url!=''}">
+                                		<img src="${book.img_url}">
+                                	</c:when>
+                                	<c:otherwise>
+                                		<img src="${path}/include/default_book.png">
+                                	</c:otherwise>
+                                </c:choose>
                                 </a>
-                                
                                 <div class="searchedBookDetails">
-                                    <!-- <span class="bookIssued">25회 대출</span> -->
-                                    <a href="#" onclick="location.href='${path}/book_servlet/view.do?isbn=<%=isbn%>'" ><h4 class="bookName"><%=title%></h4></a>
-                                    <div class="bookAuthor"><%=authors[0]%><%if(authors.length>1){ %> 외<%}%> </div>
-                                    <div class="bookPublisherYear"><%=publisher_name%>&nbsp<%=publication_year%></div>
+                                    <a href="#" onclick="location.href='${path}/book_servlet/view.do?isbn=${book.isbn}'" ><h4 class="bookName">${book.title}</h4></a>
+                                    <div class="bookAuthor">${book.main_author}</div>
+                                    <div class="bookPublisherYear">${book.publisher_name}&nbsp${book.publication_year}</div>
                                     <div class="bookNow">
-                                        <span class="bookLocationCallNumber"><%=books.get(i).getCopies().get(0).getLocation()%> 
-                                        [<%=books.get(i).getCopies().get(0).getCall_number()%>]</span>
-                                        <span class="bookStatus_ok"><%=books.get(i).getCopies().get(0).getStatus()%> </span>
+                                        <span class="bookLocationCallNumber">${book.copies.get(0).location} 
+                                        ${book.copies.get(0).call_number} </span>
+                                        <c:choose>
+                                        	<c:when test="${book.copies.get(0).status == '대출가능'}">
+                                        	<span class="bookStatus_ok">${book.copies.get(0).status} </span>
+                                        	</c:when>
+                                        	<c:when test="${book.copies.get(0).status == '정리중' || book.copies.get(0).status == '예약서가'}">
+                                        	<span class="bookStatus_wait">${book.copies.get(0).status} </span>
+                                        	</c:when>
+                                        	<c:otherwise>
+                                        	<span class="bookStatus_no">${book.copies.get(0).status} </span>
+                                        	</c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
                             </div>
-                        </li>
-
-                        <%
-                            }
-
-                        %>
-
+                        </li>               
+                    </c:forEach>
                     </ul>
                 </form>
 

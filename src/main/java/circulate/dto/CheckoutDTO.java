@@ -13,10 +13,11 @@ public class CheckoutDTO {
 	private Date due_date;
 	private Date return_date;
 	private String title;
-	private String authorname;
+	private String main_author;
 	private int renewal_count;
 	private String user_type;
 	private int late_count;
+	private int late_days;
 	
 	public long getCheckout_id() {
 		return checkout_id;
@@ -107,16 +108,6 @@ public class CheckoutDTO {
 	}
 
 
-	public String getAuthorname() {
-		return authorname;
-	}
-
-
-	public void setAuthorname(String authorname) {
-		this.authorname = authorname;
-	}
-
-
 	public int getRenewal_count() {
 		return renewal_count;
 	}
@@ -144,14 +135,31 @@ public class CheckoutDTO {
 		this.late_count = late_count;
 	}
 
+	public int getLate_days() {
+		return late_days;
+	}
+
+	public void setLate_days(int late_days) {
+		this.late_days = late_days;
+	}
+
+	public String getMain_author() {
+		return main_author;
+	}
+
+	public void setMain_author(String main_author) {
+		this.main_author = main_author;
+	}
+
 	@Override
 	public String toString() {
 		return "CheckoutDTO [checkout_id=" + checkout_id + ", copy_id=" + copy_id + ", isbn=" + isbn + ", user_id="
 				+ user_id + ", checkout_date=" + checkout_date + ", renewal_date=" + renewal_date + ", due_date="
-				+ due_date + ", return_date=" + return_date + ", title=" + title + ", authorname=" + authorname
-				+ ", renewal_count=" + renewal_count + ", user_type=" + user_type + ", late_count=" + late_count + "]";
+				+ due_date + ", return_date=" + return_date + ", title=" + title + ", main_author=" + main_author
+				+ ", renewal_count=" + renewal_count + ", user_type=" + user_type + ", late_count=" + late_count
+				+ ", late_days=" + late_days + "]";
 	}
-	
+
 	
 	
 }

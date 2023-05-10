@@ -7,7 +7,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 	<typeAliases>
 		<typeAlias type="notice.dto.NoticeDTO" alias="n"/>
 		<typeAlias type="book.dto.BookDTO" alias="b"/>
-		<typeAlias type="book.dto.CopyDTO" alias="c"/>			
+		<typeAlias type="book.dto.CopyDTO" alias="c"/>	
 	</typeAliases>
 	<!-- db연결 참조코드(context.xml과 연결됨) -->
 	<environments default="">
@@ -23,6 +23,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 	<mappers>
 		<mapper resource="/notice/mapper/notice.xml"/>
 		<mapper resource="/member/mapper/member.xml"/>		
+		<mapper resource="/book/mapper/author.xml"/>			
 		<mapper resource="/book/mapper/book.xml"/>		
 		<mapper resource="/book/mapper/copy.xml"/>
 		<mapper resource="/circulate/mapper/circulate.xml"/>

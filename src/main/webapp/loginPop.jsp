@@ -9,13 +9,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"content="width=device-width,initial-scale=1.0">
-  <link href="${path}/include/style.css" type="text/css" rel="stylesheet">
+  <link href="${path}/include/popstyle.css" type="text/css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
-<script src="${path}/include/header.js"></script>
 
 
   <title>로그인</title>
   <style>
+  
+  
+  .contentsHeader{
+    /*background-color: #7db0e8;*/
+    margin: 0;
+    padding-top: 32px;
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+	}
+
+	.contentsLocation{
+    margin-bottom: 40px;
+    /*background-color: #1d688f;*/
+	}
+  
 
     .login-box{
       margin: 0 auto;
@@ -104,7 +120,7 @@
 
     #loginDesc{
       background-color: #f1f1f1;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1.5em;
     }
 
@@ -113,7 +129,7 @@
     }
     
     
-
+    
 @media screen and (max-width: 620px) {
 
       .login-box, .login-box-main{
@@ -136,6 +152,7 @@
 
 
     }
+
 
 
 
@@ -207,63 +224,52 @@
 
 
 <body>
-<div class=float-header>
-<%@include file="../include/top.jsp" %>
-</div>
-<div class="header-location">
-</div>  
 <div class = "contents">
   <div class="contentsHeader">
   <h1>로그인</h1>
-  </div>
-  <div class="contentsLocation">
-    홈 &gt 로그인
   </div>
   <div class="contentsMain">
   <div class="login-box">
      <div>
       <input type="radio" name="login_type" value="student" checked="checked" id="std_radio">
-      <label for="std_radio">사용자 로그인</label>
+      <label for="std_radio">학생 로그인</label>
       <input type="radio" name="login_type" value="admin" id="admin_radio">
       <label for="admin_radio">관리자 로그인</label>
      </div>
     <div class="login-box-main">
       <form method="post" class="loginForm" name="loginForm">
       
+      
       <%
-      
-      if (session != null && session.getAttribute("user_id") != null) { 
-    	  
-    	String path = request.getContextPath();
-   		response.sendRedirect(path + "/index.jsp");
-   		return;
-    	}
-      
-      
-      else if(session.getAttribute("originalRequestURI")!=null){
-      %>
-         <input type="hidden" name="originalRequestURI" value="${sessionScope.originalRequestURI}">
-      <%  
-      session.removeAttribute("originalRequestURI");
-      }
-      
-      else if(session.getAttribute("referer")!=null){
-        %>
-          <input type="hidden" name="referer" value="${sessionScope.referer}">
-      <%  
-      session.removeAttribute("referer");
-      }
-      %>
-          
+      	
+      	String originalRequestURI = "";
+        if(session.getAttribute("originalRequestURI")!=null) {
+        	originalRequestURI = (String)session.getAttribute("originalRequestURI");
+    		session.removeAttribute("originalRequestURI");
+    		%>
+    		<input type="hidden" name="originalRequestURI" value="<%=originalRequestURI%>"> 
+      <%
+        }
+     	
+        if (session != null && session.getAttribute("user_id") != null) { 
+     		if(originalRequestURI.equals("")) response.sendRedirect("index.jsp");
+     		else response.sendRedirect(originalRequestURI);
+     		return;
+      	}
+        
+       %>
+
+         <input type="hidden" name="pop" value="yes">
+         
       <div class="formBody">
       <div>
         <div class="form-label">
           <label for="id">아이디</label>
-          <input type="text" id="id" name="id" autofocus placeholder="ID(학번/사번)">
+          <input type="text" id="id" name="id" autofocus placeholder="학사포탈시스템 ID(학번)">
         </div>
         <div class="form-label">
           <label for="passwd">비밀번호</label>
-          <input type="password" id="passwd" name="passwd" placeholder="비밀번호">
+          <input type="password" id="passwd" name="passwd" placeholder="학사포탈시스템 비밀번호">
       </div>
       </div>
         <button type="button" id="loginBtn" onClick="gotoLogin()">로그인</button>
@@ -285,7 +291,8 @@
     </div>
     <div id="loginDesc">
       <ul>
-        <li>도서관 사이트의 ID(학번/사번)와 비밀번호로 로그인해주세요.</li>
+        <li>학사포탈시스템의 ID(학번)와 비밀번호로 로그인해주세요.</li>
+        <li>계정 분실 시 학사포탈시스템에서 확인해주세요.</li>
         <!-- <li>졸업생은 <a href="#">회원제 서비스 가입</a> 후 로그인해 해주세요.<br> -->
         </li>
         <li>기타 문의: 학술자료운영팀 (02-1234-5678)</li>
@@ -295,9 +302,6 @@
   </div>
   </div>
 </div>
-<footer>
-<%@include file="../include/bottom.jsp" %>
-</footer>
 </body>
 </html>
 

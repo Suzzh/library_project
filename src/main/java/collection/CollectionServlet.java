@@ -1,7 +1,10 @@
 package collection;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -9,6 +12,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.Gson;
 
 import book.dto.BookDTO;
 import collection.dao.CollectionDAO;
@@ -27,8 +32,6 @@ public class CollectionServlet extends HttpServlet {
 		
 		if(uri.indexOf("top_list.do")!=-1) {
 			
-			System.out.println("list진입");
-
 			String category = "";
 			int days = 30;
 			
@@ -65,10 +68,77 @@ public class CollectionServlet extends HttpServlet {
 			request.setAttribute("days", days);
 			String page = "";
 			page = "/collection/tops.jsp";
-			System.out.println("forward");
 			RequestDispatcher rd = request.getRequestDispatcher(page);
 			rd.forward(request, response);
 			
+		}
+		
+		
+		else if(uri.indexOf("popularBooks.do")!=-1) {
+			int curPage = 1;
+			int count = 6;
+			if(request.getParameter("curPage")!=null) {
+				curPage = Integer.parseInt(request.getParameter("curPage"));
+			}
+			
+			int start = 1;
+			int end = count;
+			
+			if(curPage == 2) {
+				start = count+1;
+				end = count*2;
+			}
+			
+			List<HashMap<String, Object>> popularList 
+				= dao.getSimpleTopList(start, end);
+			
+			Map<String, Object> map = new HashMap<>();
+			map.put("popularList", popularList);
+			map.put("p_curPage", curPage);
+			Gson returnGson = new Gson();
+			String json = returnGson.toJson(map);
+			
+			//한글깨짐 방지
+		    response.setCharacterEncoding("utf-8");
+		    
+			PrintWriter writer = response.getWriter();
+			writer.write(json.toString());
+			writer.flush();
+			writer.close();
+		}
+		
+		
+		else if(uri.indexOf("recentBooks.do")!=-1) {
+			int curPage = 1;
+			int count = 6;
+			if(request.getParameter("curPage")!=null) {
+				curPage = Integer.parseInt(request.getParameter("curPage"));
+			}
+			
+			int start = 1;
+			int end = count;
+			
+			if(curPage == 2) {
+				start = count+1;
+				end = count*2;
+			}
+			
+			List<HashMap<String, Object>> recentList 
+				= dao.getSimpleRecentList(start, end);
+			
+			Map<String, Object> map = new HashMap<>();
+			map.put("recentList", recentList);
+			map.put("r_curPage", curPage);
+			Gson returnGson = new Gson();
+			String json = returnGson.toJson(map);
+			
+			//한글깨짐 방지
+		    response.setCharacterEncoding("utf-8");
+		    
+			PrintWriter writer = response.getWriter();
+			writer.write(json.toString());
+			writer.flush();
+			writer.close();
 		}
 		
 	}

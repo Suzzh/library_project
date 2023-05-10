@@ -80,13 +80,18 @@
       text-align: left;
       border-bottom: #bbc4c7 dashed 1px;
     }
-
-
+    
+    .userSummary table th{
+     width: 65px;
+    }
+        
+    
     .userSummary table tr:last-child td,
     .userSummary table tr:last-child th
     {
       border-bottom: #777777 solid 1px;
     }
+    
 
     .userMain{
       flex-grow: 1;
@@ -205,7 +210,7 @@
       $("#selectAllCheck").change(function(){
     	  
         if($(this).is(":checked")){
-          $('input:checkbox[name="checkoutCheck"]').prop('checked',true);
+          $('input:checkbox[name="checkoutCheck"][disabled=false]').prop('checked',true);
           $(".copies").addClass('selected');
         }
         else{
@@ -314,8 +319,6 @@
         	let selectedRows = $("form[name=checkoutForm] input[type=checkbox]:checked").closest("tr").not(".prohibited");
         	let data = [];
         	
-        	//let user_id = $("input[name='user_id']").val();
-
         	selectedRows.each(function() {
         	  let row = $(this);
         	  let copy_id = row.find("input[name=checkoutCheck]").val();
@@ -334,16 +337,6 @@
         	});
         	
         	
-        	/*
-        	let member = [];
-        	member.push({
-        		user_id: user_id,
-        		
-        	});
-        	
-        	*/	
-
-        	
     		$.ajax({
     			type: "post",
     			url : "${path}/circulate_servlet/checkout.do",
@@ -353,11 +346,17 @@
     			success: function(result){
     				
                     let successList = result.successList;
+                    let member = result.member;
                     
-    				if(successList.length > 0){
-    				
+    				if(successList!=null && successList.length > 0){
+    					
     					let message = "*** 총 " + successList.length + "권의 도서가 성공적으로 대출되었습니다. ***\n";
-    	                    	
+    	                
+    					$("#checkout_status").text(member.checkout_status);
+    					$("#numCheckedOut").text(member.numCheckedOut);
+    					$("#numReservations").text(member.numReservations);
+    					$("#numLateReturns").text(member.lateReturns);
+    					
     					for(let i=0; i<successList.length; i++){
     						message += (i+1 + ") ");
                             let dto = successList[i];
@@ -474,19 +473,19 @@
         <ul>
           <li>
             <div>상태</div>
-            <div>${dto.checkout_status}</div>
+            <div id="checkout_status">${dto.checkout_status}</div>
           </li>
           <li>
             <div>대출도서</div>
-            <div>${dto.numCheckedOut}/<%= max_borrow %></div>
+            <div><span id="numCheckedOut">${dto.numCheckedOut}</span>/<%= max_borrow %></div>
           </li>
           <li>
             <div>예약도서</div>
-            <div>1/3</div>
+            <div><span id="numReservations">${dto.numReservations}</span>/<%=Library.MAX_RESERVATION%></div>
           </li>
           <li>
             <div>연체도서</div>
-            <div>${dto.numLateReturns}</div>
+            <div id="numLateReturns">${dto.numLateReturns}</div>
             <!--얘네 클릭해서 정보 확인하거나 가져올 수 있게-->
           </li>
         </ul>

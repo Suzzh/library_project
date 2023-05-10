@@ -20,6 +20,9 @@ import com.google.gson.reflect.TypeToken;
 
 import circulate.dao.CirculateDAO;
 import circulate.dto.CheckoutDTO;
+import member.dao.MemberDAO;
+import member.dto.MemberDTO;
+import work.Library;
 
 @WebServlet("/circulate_servlet/*")
 public class CirculateServlet extends HttpServlet {
@@ -59,17 +62,42 @@ public class CirculateServlet extends HttpServlet {
 			
 			List<CheckoutDTO> dtoList = gson.fromJson(jsonString, listType);
 			
-			for(int i=0; i<dtoList.size(); i++) {
-				System.out.println("isbn : " + dtoList.get(i).getIsbn());
+			
+			List<CheckoutDTO> successList = null;
+			MemberDTO member = null;
+
+			if(dtoList!=null && dtoList.size()>0) {
+				successList = dao.checkout(dtoList);
+				
+				member = new MemberDTO();
+				MemberDAO mdao = new MemberDAO();
+
+				long user_id = dtoList.get(0).getUser_id();
+				System.out.println("user_id : " + user_id);
+				int numCheckedOut = mdao.countCheckouts(user_id);
+				int numLateReturns = mdao.countLateReturns(user_id);
+				member.setNumCheckedOut(numCheckedOut);
+				member.setNumLateReturns(numLateReturns);
+					
+					if(numCheckedOut > Library.getMaxBorrow(dtoList.get(0).getUser_type()) || numLateReturns >= 1) {
+						member.setCheckout_status("대출불가");
+					}
+					
+					else member.setCheckout_status("정상");
+					
+				int numReservations = mdao.countReservations(user_id);
+				member.setNumReservations(numReservations);
+
 			}
 									
-			List<CheckoutDTO> successList = dao.checkout(dtoList);
 			
 			Map<String, Object> map = new HashMap<>();
 			map.put("successList", successList);
+			map.put("member", member);
 			
 			Gson returnGson = new Gson();
 			String json = returnGson.toJson(map);
+			System.out.print(json.toString());
 			
 			//한글깨짐 방지
 		    response.setCharacterEncoding("utf-8");

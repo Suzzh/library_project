@@ -56,5 +56,13 @@
     where copy_id = #{copy_id}
 	</update>
 	
+	
+	<select id="checkReservationForCopy" resultType="int">
+	select count(*) from reservation
+	where user_id = #{user_id} and assigned_copy_id = #{copy_id} 
+	and expiration_date <![CDATA[<]]> trunc(sysdate+1) and borrowing_date is null
+	
+	</select>
+	
 
 </mapper>

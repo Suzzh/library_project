@@ -176,7 +176,16 @@
         });
 
         function check(){
-            if($("#search1_keyword").val().trim()!="" || $("#search2_keyword").val().trim()!="" || $("#search3_keyword").val().trim()!=""){
+        	
+        	let keyword1 = $("#search1_keyword").val().trim();
+        	let keyword2 = $("#search2_keyword").val().trim();
+        	let keyword3 = $("#search3_keyword").val().trim();
+        	
+        	$("#search1_keyword").val(keyword1);
+        	$("#search2_keyword").val(keyword2);
+        	$("#search3_keyword").val(keyword3);
+        	        	
+            if(keyword1!="" || keyword2!="" || keyword3!=""){
                 $("#bookSearchForm").submit();
             }
             else{
@@ -219,16 +228,12 @@
                     <select name="option" class="options">
                         <option value="all">전체</option>
                         <option selected value="title">서명</option>
-                        <option value="authornames">저자명</option>
+                        <option value="author_name">저자명</option>
                         <option value="publisher_name">출판사</option>
                         <option value="isbn">ISBN</option>
                     </select>
                     <input type="text" name="keyword" id="search1_keyword" class="keywords">
-                    <!--        <select>-->
-                    <!--          <option selected>AND</option>-->
-                    <!--          <option>OR</option>-->
-                    <!--          <option>NOT</option>-->
-                    <!--        </select>-->
+
                 </div>
                 <div>
                     <select name="option" class="options">
@@ -237,14 +242,9 @@
                         <option value="author_name" selected>저자명</option>
                         <option value="publisher_name">출판사</option>
                         <option value="isbn">ISBN</option>
-                        <%--                        <option>청구기호</option>--%>
                     </select>
                     <input type="text" name="keyword" id="search2_keyword" class="keywords">
-                    <!--        <select>-->
-                    <!--          <option selected>AND</option>-->
-                    <!--          <option>OR</option>-->
-                    <!--          <option>NOT</option>-->
-                    <!--        </select>-->
+
                 </div>
                 <div>
                     <select name="option" class="options">
@@ -253,14 +253,9 @@
                         <option value="author_name">저자명</option>
                         <option selected value="publisher_name">출판사</option>
                         <option value="isbn">ISBN</option>
-                        <%--                        <option>청구기호</option>--%>
                     </select>
                     <input type="text" name="keyword" id="search3_keyword" class="keywords">
-                    <!--        <select>-->
-                    <!--          <option selected>AND</option>-->
-                    <!--          <option>OR</option>-->
-                    <!--          <option>NOT</option>-->
-                    <!--        </select>-->
+
                 </div>
 
                 <button type=button onclick=check()>검색</button>
@@ -273,8 +268,9 @@
                 <div class="bottom">
                     <label class="labels">정렬항목</label>
                     <select name="sort">
+                        <option value="">-</option>
                         <option value="title">서명</option>
-                        <option value="authorNames">저자명</option>
+                        <option value="main_author">저자명</option>
                         <option value="publication_year">출판년도</option>
                         <option value="register_date">등록일</option>
                         <%--                        <option value="issued">대출횟수</option>--%>

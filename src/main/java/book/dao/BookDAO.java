@@ -1,16 +1,15 @@
 package book.dao;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 
+import book.dto.AuthorDTO;
 import book.dto.BookDTO;
 import book.dto.CopyDTO;
 import book.dto.FilterDTO;
-import config.DB;
 import sqlmap.MybatisManager;
 
 public class BookDAO {
@@ -29,14 +28,92 @@ public class BookDAO {
 
     	}
 
-	public void makeBookInfo(BookDTO dto) {
+	public boolean makeBookInfo(BookDTO dto, CopyDTO cdto, HashMap<String, String[]> authorMap) {
 		
-        try(SqlSession session = MybatisManager.getInstance().openSession()) {
-			session.insert("book.add", dto);
-			session.commit();
+		boolean pass = false;
+		
+		SqlSession session = MybatisManager.getInstance().openSession();
+        try {
+        	//코드 정리 요망
+        	
+        	String[] authorList = authorMap.get("author");
+        	String[] painterList = authorMap.get("painter");
+        	String[] translatorList = authorMap.get("translators");
+        	dto.setMain_author(authorList[0]);
+        	
+
+        	int checkA = 0;
+        	int checkT = 0;
+        	int checkP = 0;
+        	
+        	long isbn = dto.getIsbn();
+        	if(session.insert("book.add", dto)==1) {
+        		
+            	for(int i=0; i<authorList.length; i++) {
+            		String author_name = authorList[i].trim();
+            		System.out.println("작가명은" + authorList[i].trim());
+            		if(session.insert("author.add", author_name)==1){
+                		Map<String, Object> map = new HashMap<>();
+                    	map.put("isbn", isbn);
+                    	map.put("author_type", "지음");
+                    	if(session.insert("author.book_author_add", map)==1) {
+                    		checkA ++;
+                    	}
+            		}
+            	}
+            
+            	if(checkA == authorList.length) {
+            		
+            		if(translatorList!=null) {
+                		for(int i=0; i<translatorList.length; i++) {
+                			String author_name = translatorList[i].trim();
+                    		if(session.insert("author.add", author_name)==1) {
+                    		Map<String, Object> map = new HashMap<>();
+                    		map.put("isbn", isbn);
+                    		map.put("author_type", "옮김");
+                    		if(session.insert("author.book_author_add", map)==1) {
+                    			checkT ++;
+                    		}
+                    	}
+                	}
+            		}
+            		
+            		if(translatorList==null || checkT == translatorList.length) {
+            			if(painterList!=null) {
+                        	for(int i=0; i<painterList.length; i++) {
+                        		String author_name = painterList[i].trim();
+                        		if(session.insert("author.add", author_name)==1) {
+                            		Map<String, Object> map = new HashMap<>();
+                            		map.put("isbn", isbn);
+                            		map.put("author_type", "그림");
+                            		if(session.insert("author.book_author_add", map)==1) {
+                            			checkP ++;
+                            		}
+                        		}
+
+                        	}
+            			}
+            			
+            			if(painterList==null || checkP == translatorList.length) {
+            				if(session.insert("copy.add", cdto)==1) pass = true;
+            			}
+            		}
+            	}
+        	}
+        	
+        	if(pass==true) {
+        		session.commit();
+        	}
+        	
+        	else session.rollback();
         	} catch (Exception e) {
             e.printStackTrace();
+            session.rollback();
+        	} finally {
+        	session.close();
         	}
+        
+        return pass;
 	}
 
 	public List<BookDTO> search(String[] options, String[] keywords, int publishStart, int publishEnd, String sort, String order, int start, int end) {
@@ -54,7 +131,7 @@ public class BookDAO {
 		map.put("end", end);
 		
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
-			list = session.selectList("book.searchList2", map);
+			list = session.selectList("book.searchList", map);
 			} catch (Exception e) {
             e.printStackTrace();
         	}
@@ -172,7 +249,6 @@ public class BookDAO {
 		
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
 			bdto = session.selectOne("book.view", isbn);
-			//copy등록번호 순으로 출력되게끔 변경
 			} catch (Exception e) {
 	        e.printStackTrace();
 	    	}
@@ -191,11 +267,31 @@ public class BookDAO {
 	        e.printStackTrace();
 	    	}
 		
-		
 		return chk;
 	}
-
 	
+	
+	public int getBookReserveCount(long isbn) {
+		int reserveNum = 0;
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			reserveNum = session.selectOne("book.getBookReserveCount", isbn);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return reserveNum;
+	}
+
+	public List<CopyDTO> copyList(long isbn) {
+		List<CopyDTO> copies = null;
+		
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			copies = session.selectList("copy.list", isbn);
+			} catch (Exception e) {
+	        e.printStackTrace();
+	    	}
+	    
+	    return copies;
+	}
 	
 
 }

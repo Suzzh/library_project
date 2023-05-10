@@ -6,47 +6,29 @@ import java.util.List;
 public class BookDTO {
 
 	
-	private int publication_year, page_count, volume_number;
+	private int publication_year;
+	private int page_count;
+	private int volume_number;
 	private float book_size;
-	private String title, series_title, publisher_location, publisher_name, edition, img_url
-	, book_description, classification_code;
-	private Date register_date, last_update_date;
+	private String title;
+	private String series_title;
+	private String publisher_location;
+	private String publisher_name;
+	private String edition;
+	private String img_url;
+	private String book_description;
+	private String classification_code;
+	private Date register_date;
+	private Date last_update_date;
 	private long isbn;
-	private List<Book_AuthorDTO> authors;
+	private int checkout_times;
+	private int rank;
+
 	private List<CopyDTO> copies;
-	private String authorNames;
+	private List<AuthorDTO> authors;
+
+	private String main_author;
 	
-	
-	
-	public BookDTO() {
-		
-	}
-
-	public BookDTO(int publication_year, int page_count, int volume_number, float book_size, String title,
-			String series_title, String publisher_location, String publisher_name, String edition, String img_url,
-			String book_description, String classification_code, Date register_date, Date last_update_date, long isbn,
-			List<Book_AuthorDTO> authors, List<CopyDTO> copies) {
-		super();
-		this.publication_year = publication_year;
-		this.page_count = page_count;
-		this.volume_number = volume_number;
-		this.book_size = book_size;
-		this.title = title;
-		this.series_title = series_title;
-		this.publisher_location = publisher_location;
-		this.publisher_name = publisher_name;
-		this.edition = edition;
-		this.img_url = img_url;
-		this.book_description = book_description;
-		this.classification_code = classification_code;
-		this.register_date = register_date;
-		this.last_update_date = last_update_date;
-		this.isbn = isbn;
-	}
-
-
-
-
 
 	public List<CopyDTO> getCopies() {
 		return copies;
@@ -205,13 +187,35 @@ public class BookDTO {
 		this.isbn = isbn;
 	}
 
+	public int getCheckout_times() {
+		return checkout_times;
+	}
 
-	public List<Book_AuthorDTO> getAuthors() {
+	public void setCheckout_times(int checkout_times) {
+		this.checkout_times = checkout_times;
+	}
+
+	public int getRank() {
+		return rank;
+	}
+
+	public void setRank(int rank) {
+		this.rank = rank;
+	}
+
+	public String getMain_author() {
+		return main_author;
+	}
+
+	public void setMain_author(String main_author) {
+		this.main_author = main_author;
+	}
+
+	public List<AuthorDTO> getAuthors() {
 		return authors;
 	}
 
-
-	public void setAuthors(List<Book_AuthorDTO> authors) {
+	public void setAuthors(List<AuthorDTO> authors) {
 		this.authors = authors;
 	}
 
@@ -222,19 +226,9 @@ public class BookDTO {
 				+ ", publisher_location=" + publisher_location + ", publisher_name=" + publisher_name + ", edition="
 				+ edition + ", img_url=" + img_url + ", book_description=" + book_description + ", classification_code="
 				+ classification_code + ", register_date=" + register_date + ", last_update_date=" + last_update_date
-				+ ", isbn=" + isbn + ", authors=" + authors + ", copies=" + copies + "]";
+				+ ", isbn=" + isbn + ", checkout_times=" + checkout_times + ", rank=" + rank + ", copies=" + copies
+				+ ", authors=" + authors + ", main_author=" + main_author + "]";
 	}
-
-	public String getAuthorNames() {
-		return authorNames;
-	}
-
-	public void setAuthorNames(String authorNames) {
-		this.authorNames = authorNames;
-	}
-
-
-
 	
 
 	

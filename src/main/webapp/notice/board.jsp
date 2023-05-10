@@ -192,7 +192,7 @@
   <script>
   
   $(function(){
-	 
+	 	 
 	  	let category = "${category}";
 	  	if(category=="") category = "all";
 	  	let div = document.getElementById(category);
@@ -202,6 +202,8 @@
 	        "border": "1px solid #042d04",
 	        "font-weight": "bold"
 	  	});
+	  	
+
 	    
   });
   

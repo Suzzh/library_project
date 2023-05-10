@@ -32,7 +32,6 @@ public class NoticeDAO {
 	public List<NoticeDTO> boardList(String category, int start, int end) {
 		
 		//관리자 로그인 시 부서명이 아닌 사람이름이 보일 수 있게 수정
-		
 		try (SqlSession session = MybatisManager.getInstance().openSession()) {
 			switch(category) {
 			case "general": category="일반"; break;
@@ -75,8 +74,6 @@ public class NoticeDAO {
 	}
 
 
-
-
 	public int noticeCount(String category) {
 		
 		int count = 0;
@@ -94,6 +91,19 @@ public class NoticeDAO {
 		} 
 		return count;
 		
+	}
+
+
+	public List<HashMap<String, Object>> recentBoardList(int end) {
+
+		List<HashMap<String, Object>> noticeList = null;
+		try (SqlSession session = MybatisManager.getInstance().openSession()) {
+			
+			noticeList = session.selectList("notice.recentList", end);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return noticeList;
 	}
 
 

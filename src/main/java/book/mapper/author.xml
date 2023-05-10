@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="author">
+
+	<insert id="add">
+		insert into author(author_id, author_name)
+		values (author_id_seq.nextval, #{author_name})
+	</insert>
+	
+	
+	<insert id="book_author_add">
+		insert into book_author (book_author_id, isbn, author_id, author_type)
+		values (book_author_id_seq.nextval, #{isbn}, author_id_seq.currval, #{author_type})
+	</insert>
+
+</mapper>

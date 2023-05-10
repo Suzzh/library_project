@@ -6,29 +6,30 @@
 <mapper namespace="notice">
 
 	<insert id="write" parameterType="notice.dto.NoticeDTO">
-	insert into notice (notice_id, writer_id, dept_in_charge, title, notice_content, post_category, fix)  
-	values (notice_id_seq.nextval, #{writer_id}, #{dept_in_charge}, #{title}, #{notice_content}, #{post_category}, #{fix})	
+	insert into notice (notice_id, writer_id, title, notice_content, post_category, fix)  
+	values (notice_id_seq.nextval, #{writer_id}, #{title}, #{notice_content}, #{post_category}, #{fix})	
 	</insert>
 
 	<select id="list" resultType="notice.dto.NoticeDTO">
-	select result.*, d.dept_name 
+	select *
     from
     (select rownum rn, a.*
-	from (select * from notice
+	from (select n.*, d.dept_name 
+	from notice n
     <if test="category!=null and category!=''">
 	where post_category = #{category}
 	</if>
-	order by fix desc, notice_id desc) a) result
-	join lib_dept d on dept_in_charge = d.dept_id
+	join admin a on n.writer_id = a.admin_id
+	join lib_dept d on a.dept_id = d.dept_id
+	order by fix desc, notice_id desc) a)
     where rn between #{start} and #{end}
 	</select>
-
-
 
 	<select id="view" parameterType="int" resultType="notice.dto.NoticeDTO">
 	select n.*, d.dept_name
 	from notice n
-	join lib_dept d on n.dept_in_charge = d.dept_id
+	join admin a on a.admin_id = n.writer_id
+	join lib_dept d on a.dept_id = d.dept_id
 	where notice_id = #{notice_id}
 	</select>
 	
@@ -44,6 +45,28 @@
     <if test="category!=null and category!=''">
 	where post_category = #{category}
 	</if>
+	</select>
+	
+	<resultMap id="simpleNoticeMap" type="hashMap">
+	<id property="notice_id" column="notice_id" />
+ 	<result property="post_date" column="post_date" />
+ 	<result property="title" column="title" />
+ 	<result property="post_category" column="post_category" />
+	</resultMap>
+	
+	<select id="recentList" resultMap="simpleNoticeMap">
+	select *
+	from
+	(
+	select a.*, rownum rn 
+	from
+	(
+	select notice_id, to_char(post_date, 'yyyy-mm-dd') as post_date, title, substr(post_category, 1, 2) as post_category
+	from notice
+	order by notice_id desc
+	) a
+	)
+	where rn between 1 and #{end}
 	</select>
 	
 	

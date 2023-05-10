@@ -12,7 +12,6 @@ public class NoticeDTO {
 	private String title;
 	private String notice_content;
 	private String post_category;
-	private String dept_in_charge;
 	private String dept_name;
 
 	private String filename;
@@ -66,12 +65,7 @@ public class NoticeDTO {
 	public void setPost_category(String post_category) {
 		this.post_category = post_category;
 	}
-	public String getDept_in_charge() {
-		return dept_in_charge;
-	}
-	public void setDept_in_charge(String dept_in_charge) {
-		this.dept_in_charge = dept_in_charge;
-	}
+
 	public String getFilename() {
 		return filename;
 	}
@@ -100,11 +94,12 @@ public class NoticeDTO {
 	public String toString() {
 		return "NoticeDTO [notice_id=" + notice_id + ", view_count=" + view_count + ", fix=" + fix + ", post_date="
 				+ post_date + ", writer_id=" + writer_id + ", title=" + title + ", notice_content=" + notice_content
-				+ ", post_category=" + post_category + ", dept_in_charge=" + dept_in_charge + ", dept_name=" + dept_name
-				+ ", filename=" + filename + ", filesize=" + filesize + ", ext=" + ext + "]";
+				+ ", post_category=" + post_category + ", dept_name=" + dept_name + ", filename=" + filename
+				+ ", filesize=" + filesize + ", ext=" + ext + "]";
 	}
 	
 	
+
 
 
 	

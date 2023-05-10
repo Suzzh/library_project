@@ -26,6 +26,7 @@ public class MemberDTO {
 	private String checkout_status;
 	private int numCheckedOut;
 	private int numLateReturns;
+	private int numReservations;
 
 	public long getUser_id() {
 		return user_id;
@@ -155,19 +156,23 @@ public class MemberDTO {
 		this.numLateReturns = numLateReturns;
 	}
 
+	public int getNumReservations() {
+		return numReservations;
+	}
+
+	public void setNumReservations(int numReservations) {
+		this.numReservations = numReservations;
+	}
+
 	@Override
 	public String toString() {
 		return "MemberDTO [user_id=" + user_id + ", user_type=" + user_type + ", name=" + name + ", gender=" + gender
 				+ ", zipcode=" + zipcode + ", address1=" + address1 + ", address2=" + address2 + ", email=" + email
 				+ ", tel1=" + tel1 + ", tel2=" + tel2 + ", birthdate=" + birthdate + ", sdto=" + sdto + ", pdto=" + pdto
 				+ ", checkout_status=" + checkout_status + ", numCheckedOut=" + numCheckedOut + ", numLateReturns="
-				+ numLateReturns + "]";
+				+ numLateReturns + ", numReservations=" + numReservations + "]";
 	}
-	
-	
 
-
-
-	
+		
 		
 }

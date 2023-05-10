@@ -1,4 +1,4 @@
-<%@page import="book.dto.Book_AuthorDTO"%>
+<%@page import="book.dto.AuthorDTO"%>
 <%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -152,6 +152,7 @@
             padding: 10px 10px;
             border-bottom: dashed 1px #bbc4c7;
         }
+        
 
         .info_search table tbody tr:hover{
             background-color: rgba(228, 253, 200, 0.9);
@@ -162,6 +163,12 @@
         /*    border-bottom: #777777 solid 1px;*/
         /*    line-height: 1.6em;*/
         /*}*/
+        
+        
+        .info_search a{
+        	color: black;
+        	text-decoration: underline;
+        }
 
 
         .info_desc{
@@ -176,26 +183,77 @@
 
 
         .info_review{
-            display: flex;
-            flex-direction: column;
-        }
-
-        /*.info_review div:nth-of-type(2){*/
-        /*    text-align: center;*/
-        /*    padding: 10px 10px;*/
-        /*}*/
-
-        .info_review > div:nth-of-type(2){
-            background-color: #eceeee;
-            padding: 10px 0;
-            text-align: center;
-        }
-
-        .info_review button{
-            margin-top: 5px;
-            font-size: 16px;
-        }
-
+		display: flex;
+		flex-direction: column;
+		}
+		
+		.info_review > div:nth-of-type(2){
+		background-color: #eceeee;
+		padding: 10px 0;
+		text-align: center;
+		}
+		
+		
+		#noReviewForm button{
+		margin-top: 5px;
+		width: 200px;
+		font-size: 16px;
+		}
+		
+		form[name='reviewForm']{
+		display: none;
+		}
+		
+		#stars{
+		width: 70%;
+		min-width: 300px;
+		margin: 0 auto;
+		font-size: 34px;
+		display: flex;
+		justify-content: flex-start;
+		}		
+		
+		.star {
+		margin: 0 6px;
+		cursor: pointer;
+		}
+		
+		#stars span:first-child{
+		left-margin: 0;
+		}
+		
+		#review_write_box textarea{
+		margin: 10px auto 0 auto;
+		width: 70%;
+		min-width: 300px;
+		margin-top: 10px;
+		font-size: 16px;
+		resize: none;
+		}
+		
+		#review_content{
+		height: 180px;
+		margin-bottom: 10px;
+		}
+		
+		form[name='reviewForm'] button{
+		cursor: pointer;
+		height: 30px;
+		width: 120px;
+		font-size: 17px;
+		color: white;
+		border: none;
+		margin-left: 6px;
+		margin-top: 10px;
+		}
+		
+		#reviewSubmitBtn{
+		background-color: #042d04;
+		}
+		
+		#reviewResetBtn{
+		background-color: #6e736e;
+		}
 
         .reviews{
             list-style: none;
@@ -305,30 +363,84 @@
     </style>
 
     <script>
-
     
-	function reservation_window(yn){
-		
-		
-		let top = screen.availHeight/2 - 400;
+    
+    $(function(){
+    	$(".star").click(function(){
+    		let stars = $(".star");
+        	let grade = $(this).attr("id");
+        	$("input[name='rating']").val(grade);
+
+        	stars.each(function() {
+        		if($(this).attr("id") <= grade)
+        			$(this).text("★");
+        		else $(this).text("☆");
+        	});
+    	});
+    });
+    	
+
+    function goReservation(isbn, title){
+    	
+    	let top = screen.availHeight/2 - 250;
 		if(top < 0) top = 0;
 
-		let left = screen.availWidth/2 - 300;
+		let left = screen.availWidth/2 - 200;
 		if(left < 0) left = 0;
 		
-		if(yn == 'y'){
-			alert("로그인");
-			window.open("${path}/checkout/checkout.jsp", "도서예약",  "left="+left+", top="+top+", width=300, height=400");
-		}
-		
-		else{
-			alert("로그인안됨");
-			window.open("${path}/checkout/checkout.jsp", "도서예약",  "left="+left+", top="+top+", width=300, height=400");
-			//팝업창 띄우고 로그인->예약 순
-		}
-		
-	}
+		window.open("${path}/my_library/reservation.do?isbn=" + isbn + "&title=" + title, "도서예약",  "left="+left+", top="+top+", width=400, height=500");
+	
+    }
+    
+    
+    function showReviewForm(){
+    	let user_id = "${sessionScope.user_id}";
+    	if(user_id!=null && user_id!=''){
+	    	$("#noReviewForm").css("display", "none");
+	    	$("form[name='reviewForm").css({
+	    	"display": "flex",
+	    	"flex-direction": "column"
+	    	});
+    	}
+    	
+    	else{
+    		alert('로그인이 필요한 기능입니다.');
+    		location.href = "${path}/member_servlet/loginForm.do";
+    	}
+    	
+    	}
 
+
+    	function resetReview(){
+	    	if($("#review_content").val().trim()!=''){
+		    	if(confirm('리뷰 작성을 취소하시겠습니까?')){
+			    	$("#review_content").val("");
+			    	$("#review_title").val("");
+			    	$("#1").text("★");
+			    	$("#2").text("★");
+			    	$("#3").text("★");
+			    	$("#4").text("☆");
+			    	$("#5").text("☆");
+			    	$("input[name='rating']").val("3");
+			    	$("form[name='reviewForm").css("display", "none");
+			    	$("#noReviewForm").css("display", "block");
+	    	}
+	    	}
+	    	
+	    	else{
+		    	$("#1").text("★");
+		    	$("#2").text("★");
+		    	$("#3").text("★");
+		    	$("#4").text("☆");
+		    	$("#5").text("☆");
+		    	$("input[name='rating']").val("3");
+		    	$("#review_content").val("");
+		    	$("#review_title").val("");	    		
+	    		$("form[name='reviewForm").css("display", "none");
+		    	$("#noReviewForm").css("display", "block");
+	    	}
+    	}
+    
     </script>
 
 </head>
@@ -360,14 +472,14 @@
         List<String> authorNames = new ArrayList<>();
         List<String> translatorNames = new ArrayList<>();
         List<String> painterNames = new ArrayList<>();
-        List<Book_AuthorDTO> authors = book.getAuthors();
+        List<AuthorDTO> authors = book.getAuthors();
         
-        for (Book_AuthorDTO bookAuthor : authors){
-        	if(bookAuthor.getAuthor_type().equals("그림")){
-        		painterNames.add(bookAuthor.getAuthor().getAuthor_name());
-        	} else if(bookAuthor.getAuthor_type().equals("옮김")){
-        		translatorNames.add(bookAuthor.getAuthor().getAuthor_name());
-        	} else {authorNames.add(bookAuthor.getAuthor().getAuthor_name());
+        for (AuthorDTO author : authors){
+        	if(author.getAuthor_type().equals("그림")){
+        		painterNames.add(author.getAuthor_name());
+        	} else if(author.getAuthor_type().equals("옮김")){
+        		translatorNames.add(author.getAuthor_name());
+        	} else {authorNames.add(author.getAuthor_name());
         	}
         }
         
@@ -377,7 +489,7 @@
         
         %>
 
-        <h2>${bdto.title} (35회 대출)</h2> <%=author%>
+        <h2>${bdto.title}</h2> <%=author%>
         </div>
         <div class="profile">
             <div class="bookImgWrapper">
@@ -399,8 +511,8 @@
                     <tr>
                         <th>저자</th>
                         <td>
-                            <c:forEach var="book_author" items="${bdto.authors}">
-                            ${book_author.author.author_name}<br>
+                            <c:forEach var="author" items="${bdto.authors}">
+                            ${author.author_name}<br>
                             </c:forEach>
                     </tr>
                     <tr>
@@ -413,9 +525,9 @@
                         <c:if test="${bdto.page_count!=0 && bdto.page_count!=null}">
                         ${bdto.page_count}
                         </c:if>
-                        p. 
+                        p. ; 
                         <c:if test="${bdto.book_size!=0 && bdto.book_size!=null}">
-                        ${bdto.book_size} ;
+                        ${bdto.book_size}
                         </c:if>                        
                         cm</td>
                     </tr>
@@ -473,28 +585,18 @@
                         <td>
                         <c:if test="${status.count == 1}">
                             <c:choose>
-	                        	<c:when test="${reservation_ok && sessionScope.user_id != null && sessionScope.user_id != ''}">
-	                        	<a onclick="reservation_window('y')">예약가능<br>
+	                        	<c:when test="${reservation_status=='예약가능'}">
+	                        	<a href="#" onclick="goReservation(${bdto.isbn}, '${bdto.title}')">${reservation_status}<br>
 	                        	(${reservation_count}명 예약중)
 	                        	</a>
 	                        	</c:when>
-	                        	<c:when test="${reservation_ok && (sessionScope.user_id == null || sessionScope.user_id == '')}">
-	                        	<a href="#" onclick="reservation_window('n')">예약가능<br>
-	                        	(${reservation_count}명 예약중)
-	                        	</a>
-	                        	</c:when>
-	                        	<c:when test="${!reservation_ok && reservation_count >= copies.size()}">
-	                        	예약한도초과<br>
-	                        	(${reservation_count}명 예약중)
-	                        	</c:when>
-	                        	<c:when test="${status.count == 0 && reservation_ok}">
-	                        	예약불가<br>
+	                        	<c:otherwise>
+	                        	${reservation_status}<br>
 	                        		<c:if test="${reservation_count} > 0">
 	                        		(${reservation_count}명 예약중)
 	                        		</c:if>
-	                        	</c:when>
+	                        	</c:otherwise>
                             </c:choose>
-                        
                         </c:if>
                         </td>
                     </tr>
@@ -518,10 +620,27 @@
             <div class="headers">
                 <h3>서평</h3>
             </div>
-            <div>
-                4건의 서평이 있습니다.<br>
-                <button type="button">서평을 작성하세요.</button>
-            </div>
+	<div id="review_write_box">
+		<div id="noReviewForm"> 4건의 서평이 있습니다.<br>
+		<button type="button" onclick="showReviewForm()">서평을 작성하세요.</button>
+		</div>
+		
+		<form name="reviewForm" id="reviewForm" action="${path}/my_library/addReview.do">
+		<div id="stars">
+		<span id="1" class="star">★</span><span id="2" class="star">★</span>
+		<span id="3" class="star">★</span><span id="4" class="star">☆</span>
+		<span id="5" class="star">☆</span>
+		<input type="hidden" name="rating" value="3">
+		</div>
+		
+		<textarea name="review_title" id="review_title" rows="1" value="${review_title}"></textarea>
+		<textarea name="review_content" id="review_content" value="${review.content}"></textarea>
+		<div>
+		<button type="button" id="reviewSubmitBtn">작성</button>
+		<button type="button" id="reviewResetBtn" onclick="resetReview()">작성취소</button>
+		</div>
+		</form>
+	</div>
             <ul class="reviews">
                 <li class="review">
                     <dt>재미있어요.</dt>

@@ -15,7 +15,7 @@
             </td>
             <td>${cdto.call_number}</td>
             <td>${cdto.location}</td>
-            <td><input type="date" name="due_date" value=""></td>
+            <td><input type="date" name="due_date" value="" disabled="disabled"></td>
             <td>${cdto.status}</td>
 			</c:when>
 			

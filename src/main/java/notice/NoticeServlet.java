@@ -1,7 +1,10 @@
 package notice;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -10,7 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
+
+import com.google.gson.Gson;
 
 import admin.dao.AdminDAO;
 import notice.dao.NoticeDAO;
@@ -42,8 +46,13 @@ public class NoticeServlet extends HttpServlet {
 			
 			int curPage = 1;
 
-			if(request.getParameter("curPage")!=null) {
-				curPage = Integer.parseInt(request.getParameter("curPage"));
+			if(request.getParameter("curPage")!=null && request.getParameter("curPage")!="") {
+				try {
+					curPage = Integer.parseInt(request.getParameter("curPage"));	
+				} catch (Exception e) {
+					e.printStackTrace();
+					curPage = 1;
+				}
 			}
 			
 			Pager pager = new Pager(count, curPage, 20);
@@ -55,6 +64,7 @@ public class NoticeServlet extends HttpServlet {
 			request.setAttribute("notices", notices);
 			request.setAttribute("category", category);
 			request.setAttribute("page", pager);
+			System.out.println(pager.getCurPage());
 			RequestDispatcher rd = request.getRequestDispatcher("/notice/board.jsp");
 			rd.forward(request, response);
 			
@@ -79,9 +89,6 @@ public class NoticeServlet extends HttpServlet {
 			
 			dto.setWriter_id(admin_id);
 			
-			AdminDAO adminDAO = new AdminDAO();
-			String dept_in_charge = adminDAO.getDept(admin_id);
-			dto.setDept_in_charge(dept_in_charge);
 			dto.setTitle(request.getParameter("title"));
 			dto.setNotice_content(request.getParameter("notice_content"));
 			dto.setPost_category(request.getParameter("post_category"));
@@ -95,7 +102,7 @@ public class NoticeServlet extends HttpServlet {
 			dto.setFix(fixyn);
 			
 			dao.writeBoard(dto);
-			String page = request.getContextPath()+"/notice/board.do";
+			String page = request.getContextPath()+"/notice_servlet/board.do";
 			response.sendRedirect(page);
 				
 		}
@@ -114,6 +121,23 @@ public class NoticeServlet extends HttpServlet {
 			String page = "/notice/view.jsp";
 			RequestDispatcher rd = request.getRequestDispatcher(page);
 			rd.forward(request, response);
+		}
+		
+		
+		else if(uri.indexOf("recentNotices.do")!=-1){
+			List<HashMap<String, Object>> noticeList = dao.recentBoardList(5);
+			Map<String, Object> map = new HashMap<>();
+			map.put("noticeList", noticeList);
+			Gson returnGson = new Gson();
+			String json = returnGson.toJson(map);
+			
+			//한글깨짐 방지
+		    response.setCharacterEncoding("utf-8");
+		    
+			PrintWriter writer = response.getWriter();
+			writer.write(json.toString());
+			writer.flush();
+			writer.close();
 		}
 		
 

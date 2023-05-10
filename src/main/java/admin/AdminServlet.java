@@ -55,7 +55,7 @@ public class AdminServlet extends HttpServlet {
 				session.setAttribute("user_id", admin_id);
 				session.setAttribute("user_name", name);
 
-				page = "/notice/board.jsp";
+				page = "/main_servlet/index.do";
 				
 			}
 			

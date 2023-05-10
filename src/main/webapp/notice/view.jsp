@@ -76,33 +76,7 @@
 <body>
 
 <div class="float-header">
-  <div class="header-upper-box">
-    <div class="header-upper">
-      <div class="header-left">
-        <a href="index.html" title="지혜대학교 도서관"><img src="https://cdn-icons-png.flaticon.com/512/3362/3362210.png" width="40px"></a>
-        <a href="index.html" id="sitename" title="지혜대학교 도서관"><strong>지혜대학교 도서관</strong><br><strong>WISDOM UNIVERSITY LIBRARY</strong></a>
-      </div>
-      <div class="header-right">
-        <a href="login.html" id="toLogin" title="로그인">로그인</a>
-        <form name="totalSearch" id="totalSearch" method="get">
-          <input type="text" size="15" placeholder="사이트내 검색"
-                 style="width:120px; height:30px; margin-left: 30px; padding-left: 12px;">
-          <input type="submit" value="search"
-                 style="width:70px; height:30px;">
-        </form>
-      </div>
-    </div>
-  </div>
-  <div class="nav">
-    <ul class="menu">
-      <li>도서검색</li>
-      <li>시설예약</li>
-      <li>컬렉션</li>
-      <li>도서관안내</li>
-      <li>내 서재</li>
-      <li>#</li>
-    </ul>
-  </div>
+<%@include file="../include/top.jsp" %>
 </div>
 
 <div class="header-location">
@@ -133,8 +107,7 @@
 
 
 <footer>
-  지혜대학교도서관 서울특별시 강남구<br>
-  COPYRIGHT 2023 WISDOM UNIVERSITY
+<jsp:include page="../include/bottom.jsp"></jsp:include>
 </footer>
 
 

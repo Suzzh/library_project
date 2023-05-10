@@ -8,34 +8,49 @@
 	
 	<insert id="checkout" parameterType="circulate.dto.CheckoutDTO">
 	insert into checkout
-	(checkout_id, copy_id, isbn, user_id, checkout_date, due_date) 
-	values(checkout_id_seq.nextval, #{copy_id}, #{isbn}, #{user_id}, sysdate, #{due_date})
+	(checkout_id, copy_id, user_id, checkout_date, due_date) 
+	values(checkout_id_seq.nextval, #{copy_id}, #{user_id}, sysdate, #{due_date})
 	</insert>
-		
-				
-	<select id="countCheckouts" parameterType="Long" resultType="java.util.Map">	
-	select 
-    (select count(*)
+	
+	<select id="chkReservationByChkoutID" resultType="int">
+	select count(*)
+	from checkout chk
+	join copy c on chk.copy_id = c.copy_id
+	join books b on c.isbn = b.isbn
+	where checkout_id = #{checkout_id}
+	and exists( 
+	select reservation_id 
+	from reservation r
+	where expiration_date is null
+	and r.isbn = b.isbn )
+	</select>
+	
+	<!-- 
+	<select id="countRenewal" resultType="int">
+	select nvl(renewal_count, 0)
 	from checkout
-  	where user_id = #{user_id} 
-    and return_date is null) as checkouts,
-    (select count(*)
-    from checkout
-    where user_id = #{user_id} 
-    and return_date is null
-    and coalesce(trunc(renewal_date+1),trunc(due_date+1)) <![CDATA[<]]> trunc(sysdate+1)
-    ) as late_returns
-    from dual	
-    </select>
-    
-    <select id="getReservNum" resultType="int">
-    select count(*) from reservation
-	where isbn = #{isbn}
-	and
-	checkout_date is null
-	and
-	expire_date is null
-    </select>
-    
-
+	where checkout_id = #{checkout_id}
+	</select>
+	 -->
+	
+	
+	<update id="renewal">
+	update checkout
+	set due_date = #{new_due_date}, renewal_count = (nvl(renewal_count,0)+1)
+	where (
+	<trim suffixOverrides="or">
+	<foreach item="checkout_id" index="index" collection="newList">
+	checkout_id = #{checkout_id} or
+	</foreach>
+	</trim>
+	) and renewal_count <![CDATA[<]]> #{max_renewal}
+	</update>
+	
+	
+	<insert id="reservation">
+	insert into reservation (reservation_id, isbn, user_id) 
+	values(reservation_id_seq.nextval, #{isbn}, #{user_id})
+	</insert>
+	
+	
 </mapper>

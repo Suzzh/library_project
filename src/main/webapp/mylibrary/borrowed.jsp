@@ -189,33 +189,64 @@
       background-color: #bbc4c7;
     }
 
-    .noticePaging{
+   .paging{
       display: flex;
       width:100%;
       justify-content: center;
-      margin-top: 20px;
+      margin: 25px 0 0 0;
     }
 
-    .noticePaging div{
+    .paging div{
+      clear: both;
       padding: 6px 10px;
       transition: background-color 0.1s, font-weight 0.1s;
     }
-
-    .noticePaging div:hover{
+    
+    .paging div:hover{
       background-color: gainsboro;
       cursor: pointer;
       font-weight: bold;
     }
+    
+    .paging a{
+	    text-decoration: none;
+	    color: black;
+    }
+    
+    
+    #curPage{
+    	text-decoration: underline;
+    	font-weight: bold;
+    }
+    
+    
+    @media screen and (max-width: 820px) {
+      .userSummary{
+        float: none;
+        position: initial;
+        display: flex;
+        flex-direction: column;
+        align-items: end;
+        margin-bottom: 20px;
+      }
+
 
   </style>
 
   <script>
 
     $(function(){
+    	
+    	
+    	let message = "${message}";
+    	if(message != null && message != ''){
+    		alert(message);
+    	}
+    	
 
       $("#selectAllCheck").change(function(){
         if($(this).is(":checked")){
-          $('input:checkbox[name="renewCheck"]').prop('checked',true);
+          $('input:checkbox[name="renewCheck"][disabled=false]').prop('checked',true);
         }
         else{
           $('input:checkbox[name="renewCheck"]').prop('checked',false);
@@ -232,7 +263,44 @@
       });
 
     });
+    
+	function list(curPage){
+	      location.href="${path}/my_library/borrowedBooks"+"&curPage=" + curPage;
+	}
+	
+	
+	function renewAll(){
+		
+		if("${dto.checkout_status}"=="대출불가"){
+			alert("대출 연장이 불가능한 상태입니다.");
+			return false;
+		}
+		
+		let checked = $("input[name='renewCheck']:checked");
+		
+		if(checked.length > 0){
+			$("input[name='title']").attr("disabled", true);
+			let selectedRows = checked.closest("tr");
+			
+			selectedRows.each(function() {
+	        	  let row = $(this);
+	        	  row.find("input[name='title']").attr("disabled", false);
+	        });
+			
+			
+			document.form1.action = "${path}/my_library/renewal.do";
+			document.form1.submit();
 
+		}
+		
+		else{
+			alert("대출기간 연장을 희망하는 도서를 선택해주세요.");
+			return;
+		}
+		
+	}
+
+	
   </script>
 
 
@@ -259,11 +327,6 @@
 
 
     <div class="userSummary">
-<!--        <div id="profile">-->
-<!--          <h3>한수진(2014119033)</h3>-->
-<!--          <div>문과대 심리학과 / 학부생</div>-->
-<!--        </div>-->
-
         <ul>
           <li>
             <div>상태</div>
@@ -278,7 +341,7 @@
           </li>
           <li>
             <div>예약도서</div>
-            <div>1/3</div>
+            <div>${dto.numReservations}/<%=Library.MAX_RESERVATION%></div>
           </li>
           <li>
             <div>연체도서</div>
@@ -299,21 +362,13 @@
     </div>
 
     <div class="userStatus">
-<!--      <div>이용자 대출상태</div>-->
-<!--      회원상태: 6권 대출 중, 정상-->
-<!--      <ul>-->
-<!--        <li>이용자 이름: 한수진</li>-->
-<!--        <li>이용자 번호: 2014119033</li>-->
-<!--        <li>회원상태: 6권 대출 중, 정상</li>-->
-<!--      </ul>-->
     </div>
-
     <div class="boardUpper">
       <div class="boardUpper-left">
-      <span>총 6권 대출</span>
+      <span>총 ${dto.numCheckedOut}권 대출중</span>
       <div id="selectAll">
 <!--        <label for="selectAllCheck">전체선택</label>-->
-        <button type="button" id="renewAll">선택도서 대출연장</button>
+        <button type="button" id="renewAll" onclick="renewAll()">선택도서 대출연장</button>
       </div>
       </div>
         <div id="sorting">
@@ -345,6 +400,9 @@
 <!--          </div>-->
 <!--        </form>-->
 <!--      </div>-->
+
+	<form name="form1" method="post">
+    <input type="hidden" name="curPage" value="${page.curPage}">
     <table id="noticeBoard">
       <thead>
       <tr>
@@ -358,37 +416,72 @@
       </tr>
       </thead>
       <tbody>
-      <c:forEach var="row" items="${list}">
+      <c:forEach var="row" items="${list}" varStatus="status">
         <tr>
-        <td><input type="checkbox" name="renewCheck"></td>
-        <td>1</td>
         <td>
-          ${row.title} / 이미예 지음</td>
+        <c:choose>
+        	<c:when test="${row.renewal_count>=maxRenewal || dto.checkout_status=='대출불가'}">
+	        	<input type="checkbox" name="renewCheck" disabled="disabled" value="${row.checkout_id}">
+        	</c:when>
+        	<c:otherwise>
+        		<input type="checkbox" name="renewCheck" value="${row.checkout_id}">
+        	</c:otherwise>
+        </c:choose>
+        </td>
+        <c:set var="num" value="${(page.curPage-1)*page.page_scale+status.count}"/>
+        <td>${num}</td>
+        <td>
+          ${row.title} <input type="hidden" name="title" value="${row.title}">
+           / ${row.main_author} 지음</td>
         <td><fmt:formatDate value="${row.checkout_date}" pattern="yyyy-MM-dd"/></td>
         <td><fmt:formatDate value="${row.due_date}" pattern="yyyy-MM-dd"/></td>
-        <td>0</td>
+        <td>${row.late_days}</td>
         <td>${row.renewal_count}</td>
       </tr>    
       </c:forEach>
       </tbody>
     </table>
+    </form>
 
-    <div class="noticePaging">
+    <div class="paging">
+    <c:if test="${page.curPage > 1}">
+      <a href="#" onclick="list('1')">
       <div>&lt&lt</div>
+      </a>
+    </c:if>
+    <c:if test="${page.curBlock > 1}">
+      <a href="#" onclick="list('page.prevPage')">
       <div>&lt</div>
-      <div>1</div>
-      <div>2</div>
-      <div>3</div>
-      <div>4</div>
-      <div>5</div>
-      <div>6</div>
-      <div>7</div>
-      <div>8</div>
-      <div>9</div>
+      </a>
+    </c:if>
+    <c:forEach var="num" begin="${page.blockStart}" end="${page.blockEnd}">
+    	<c:choose>
+    		<c:when test="${num==page.curPage}">
+    		      <a href="#" onclick="list('${num}')">
+    		      <div id="curPage">${num}</div>
+				  </a>
+    		</c:when>
+    		<c:otherwise>
+    		      <a href="#" onclick="list('${num}')">
+    		      <div>${num}</div>
+				  </a>
+    		</c:otherwise>
+    	</c:choose>
+    </c:forEach>
+    <c:if test="${page.curBlock < page.totBlock}">
+	  <a href="#" onclick="list('${page.nextPage}')">
       <div>&gt</div>
+      </a>
+    </c:if>
+    <c:if test="${page.curPage < page.totPage}">
+	  <a href="#" onclick="list('${page.totPage}')">
       <div>&gt&gt</div>
+      </a>
+    </c:if>
+    </div>
 
     </div>
+  </div>
 
   </div>
 </div>

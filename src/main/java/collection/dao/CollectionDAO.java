@@ -55,13 +55,45 @@ public class CollectionDAO {
 				
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
 			num = session.selectOne("book.getTopNums", map);
-			System.out.println("tot_num은" + num);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		return num;
+	}
+
+	
+	public List<HashMap<String, Object>> getSimpleTopList(int start, int end) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("start", start);
+		map.put("end", end);
+
+		List<HashMap<String, Object>> topList = null;
+		
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			topList = session.selectList("book.simpleTopList", map);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return topList;
+	}
+
+	public List<HashMap<String, Object>> getSimpleRecentList(int start, int end) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("start", start);
+		map.put("end", end);
+
+		List<HashMap<String, Object>> recentList = null;
+		
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			recentList = session.selectList("book.simpleRecentList", map);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return recentList;
 	}
 
 }

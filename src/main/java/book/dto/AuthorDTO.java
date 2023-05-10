@@ -5,9 +5,11 @@ import java.util.Date;
 public class AuthorDTO {
 	
 	private int author_id;
+	private int book_author_id;
 	private String author_name, biography, works, author_type;
 	private Date birthdate;
 	private int preference;
+
 	
 	public AuthorDTO() {
 		
@@ -80,15 +82,26 @@ public class AuthorDTO {
 	public void setPreference(int preference) {
 		this.preference = preference;
 	}
+	
+	
+	public int getBook_author_id() {
+		return book_author_id;
+	}
+
+	public void setBook_author_id(int book_author_id) {
+		this.book_author_id = book_author_id;
+	}
 
 	@Override
 	public String toString() {
-		return "AuthorDTO [author_id=" + author_id + ", author_name=" + author_name + ", biography=" + biography
-				+ ", works=" + works + ", author_type=" + author_type + ", birthdate=" + birthdate + ", preference="
-				+ preference + "]";
+		return "AuthorDTO [author_id=" + author_id + ", book_author_id=" + book_author_id + ", author_name="
+				+ author_name + ", biography=" + biography + ", works=" + works + ", author_type=" + author_type
+				+ ", birthdate=" + birthdate + ", preference=" + preference + "]";
 	}
+
 	
-	
+
+
 	
 	
 

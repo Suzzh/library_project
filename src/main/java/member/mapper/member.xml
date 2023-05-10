@@ -20,7 +20,7 @@
 	<select id="member_view" resultType="member.dto.MemberDTO">
 	select user_id, user_type, name, gender, zipcode, address1, address2, email, tel1, tel2, birthdate
 	from users
-	where user_id = #{user_id}
+	where user_id = #{user__id}
 	</select>
 	
 	
@@ -28,28 +28,62 @@
 	select student_id, dept_name, status, grade 
 	from students s
 	inner join dept d on s.dept_id = d.dept_id
-	where user_id=#{user_id}
+	where student_id=#{user_id}
 	</select>
 	
 	<select id="professor_view" resultType="member.dto.ProfessorDTO">
 	select professor_id, dept_name, rank 
 	from professors p
 	inner join dept d on p.dept_id = d.dept_id;
-	where user_id=#{user_id}
+	where professor_id=#{user_id}
 	</select>
 
 
 	<select id="getBorrowedBooks" resultType="circulate.dto.CheckoutDTO">
-	select b.title, c.checkout_date, coalesce(c.renewal_date,c.due_date) as due_date, c.renewal_count,
-	listagg(a.author_name, ';') within group (order by ba.preference desc, a.author_id) as authornames
-	from checkout c
+	select *
+    from
+    (
+    select a.*, rownum rn
+    from
+    (
+	select b.title, b.main_author, chk.checkout_id, chk.checkout_date, due_date, chk.renewal_count
+	from checkout chk
+	join copy c on chk.copy_id = c.copy_id
 	join books b on c.isbn = b.isbn
-	join book_author ba on c.isbn = ba.isbn
-	join author a on ba.author_id = a.author_id
-	where c.return_date is null and c.user_id = #{user_id} and ba.author_type = '지음'
-	group by b.title, c.checkout_date, c.due_date, c.renewal_date, c.renewal_count
+	where chk.return_date is null and chk.user_id = #{user_id}
 	order by checkout_date desc
+    ) a
+    ) where rn between #{start} and #{end}
 	</select>
-
+	
+	
+	<select id="checkReservation" resultType="int">
+	select count(*) from reservation
+	where user_id=#{user_id} and isbn = #{isbn} and 
+	(expiration_date is null or (expiration_date <![CDATA[<]]> trunc(sysdate+1) and borrowing_date is null))
+	</select>
+	
+	
+	<select id="countReservations" resultType="int">
+	select count(*)
+	from reservation
+	where user_id = #{user_id} and borrowing_date is null and (expiration_date is null or expiration_date <![CDATA[<]]> trunc(sysdate+1))
+	</select>
+	
+	<select id="countCheckouts" parameterType="long" resultType="int">	
+	select count(*)
+	from checkout
+  	where user_id = #{user_id} 
+    and return_date is null
+    </select>
+    
+    <select id="countLateReturns" parameterType="long" resultType="int">
+    select count(*)
+    from checkout
+    where user_id = #{user_id} 
+    and return_date is null
+    and trunc(due_date+1) <![CDATA[<]]> trunc(sysdate+1)
+    </select>
+    
 
 </mapper>

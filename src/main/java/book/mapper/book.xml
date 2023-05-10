@@ -4,6 +4,8 @@
 
 
 <mapper namespace="book">
+
+
 	<select id="checkUniqueness" parameterType="long" resultType="String">
 	select title from books 
 	where isbn=#{isbn}
@@ -11,27 +13,20 @@
 
 	<insert id="add" parameterType="book.dto.BookDTO">
 	insert into books (isbn, title, series_title, publisher_location, publisher_name, publication_year, 
-	page_count, book_size, classification_code, volume_number, edition, img_url, book_description) 
+	page_count, book_size, classification_code, volume_number, edition, main_author) 
 	values( #{isbn}, #{title}, #{series_title}, #{publisher_location}, #{publisher_name}, #{publication_year},
-	#{page_count}, #{book_size}, #{classification_code}, #{volume_number}, #{edition}, #{img_url}, #{book_description}
+	#{page_count}, #{book_size}, #{classification_code}, #{volume_number}, #{edition}, #{main_author}
 	 )
 	</insert>
 	
-	
+
 	<resultMap id="bookResultMap" type="book.dto.BookDTO">
 	<id column="isbn" property="isbn"/>
+	<result column="img_url" property="img_url"/>	
 	<result column="title" property="title"/>
-	<result column="series_title" property="series_title"/>
 	<result column="publication_year" property="publication_year"/>
 	<result column="publisher_name" property="publisher_name"/>
-	<result column="img_url" property="img_url"/>
-	<collection property="authors" javaType="java.util.List" ofType="book.dto.Book_AuthorDTO">
-		<id column= "book_author_id" property="book_author_id"/>
-		<result column="author_type" property="author_type"/>
-		<association property="author" javaType="book.dto.AuthorDTO">
-			<result column="author_name" property="author_name"/>
-		</association>
-	</collection>
+	<result column="main_author" property="main_author"/>
 	<collection property="copies" javaType="java.util.List" ofType="book.dto.CopyDTO">
 		<id column="copy_id" property="copy_id"/>
 		<result column="call_number" property="call_number"></result>
@@ -39,25 +34,6 @@
 		<result column="status" property="status"></result>
 	</collection>
 	</resultMap>
-	
-		
-	<resultMap id="bookResultMap2" type="book.dto.BookDTO">
-	<id column="isbn" property="isbn"/>
-	<result column="title" property="title"/>
-	<result column="authorNames" property="authorNames"/>
-	<result column="series_title" property="series_title"/>
-	<result column="publication_year" property="publication_year"/>
-	<result column="register_date" property="register_date"/>
-	<result column="publisher_name" property="publisher_name"/>
-	<result column="img_url" property="img_url"/>
-	<collection property="copies" javaType="java.util.List" ofType="book.dto.CopyDTO">
-		<id column="copy_id" property="copy_id"/>
-		<result column="call_number" property="call_number"></result>
-		<result column="location" property="location"></result>
-		<result column="status" property="status"></result>
-	</collection>
-	</resultMap>
-	
 	
 	
 	    <sql id="searchUsingKeyword">
@@ -130,26 +106,28 @@
     
     
 	
-		<select id="searchList2" resultMap="bookResultMap2">
+		<select id="searchList" resultMap="bookResultMap">
 		select * 
 		from
 		(
-		select result2.*, c.call_number, c.location, c.status, row_number() over(order by ${sort} ${order}) as rn
+		select result.isbn, img_url, title, publication_year, publisher_name, register_date, main_author,
+		c.call_number, c.location, c.status, 
+			<choose>
+				<when test="sort!=null and sort!=''">
+					row_number() over(order by ${sort} ${order}) as rn
+				</when>
+				<otherwise>
+					rownum as rn
+				</otherwise>
+			</choose>
 		from
 		(
-		select isbn, img_url, title, publication_year, publisher_name, register_date,
-		LISTAGG(author_name, ';') WITHIN GROUP (ORDER BY preference DESC, author_id) AS authorNames
-		from
-		(SELECT b.isbn, b.img_url, b.title, b.publication_year, b.publisher_name, b.register_date,
-		ba.author_id, ba.author_type, ba.preference, 
-		a.author_name
-		FROM books b
-		INNER JOIN book_author ba ON b.isbn = ba.isbn
-		INNER JOIN author a ON ba.author_id = a.author_id
+        select b.isbn, b.img_url, b.title, b.publication_year, b.publisher_name, b.register_date, b.main_author
+        FROM books b
 		<where>
 		<trim prefixOverrides="AND">
 		<include refid="searchUsingKeyword"/>
-		<if test="publishStart!=0">1
+		<if test="publishStart!=0">
 		AND b.publication_year <![CDATA[>]]>= #{publishStart}
 		</if>
 		<if test="publishEnd!=0">
@@ -157,95 +135,20 @@
 		</if>
 		</trim>
 		</where>
-		) result
-		where author_type = '지음'
-		group by isbn, img_url, title, publication_year, publisher_name, register_date
-		) result2
-		INNER JOIN (
+        )result
+		inner JOIN (
 		  SELECT isbn, COALESCE(
 		  MIN(CASE WHEN status = '대출가능' THEN copy_id ELSE NULL END), 
 		  MIN(CASE WHEN status = '대출중' THEN copy_id ELSE NULL END),
 		  MIN(copy_id)) as copy_id
 		  FROM copy
 		  GROUP BY isbn
-		) available ON result2.isbn = available.isbn
-		INNER JOIN copy c ON available.copy_id = c.copy_id
+		) available ON result.isbn = available.isbn
+		inner JOIN copy c ON available.copy_id = c.copy_id
 		)
-		where rn between #{start} and #{end}	
+		where rn between #{start} and #{end}
+		order by rn
 		</select>
-	
-	
-	
-	<!-- 
-	<select id="searchList" resultMap="bookResultMap">
-	select * 
-	from
-	(select result.*, c.call_number, c.location, c.status, c.copy_id, dense_rank() over (order by result.isbn) as rn
-	from
-	(SELECT b.isbn, b.img_url, b.title, b.publication_year, b.publisher_name, b.register_date,
-	ba.author_id, ba.author_type, a.author_name
-	FROM books b
-	INNER JOIN book_author ba ON b.isbn = ba.isbn
-	INNER JOIN author a ON ba.author_id = a.author_id
-	<where>
-	<trim prefixOverrides="AND">
-	<foreach item="keyword" index="index" collection="keywords">
-	<if test="keywords[index] != '' and keywords[index] != null">
-				<choose>
-			<when test="options[index] == 'title'">
-				AND lower(b.title) like lower('%'||#{keyword}||'%')
-			</when>
-			<when test="options[index] == 'publisher_name'">
-				AND lower(b.publisher_name) like lower('%'||#{keyword}||'%')
-			</when>
-			<when test="options[index] == 'author_name'">
-				AND EXISTS (
-				  SELECT 1
- 				 FROM book_author ba${index}
- 				 INNER JOIN author a${index} ON ba${index}.author_id = a${index}.author_id
-  				WHERE ba${index}.isbn = b.isbn
-  				AND lower(a${index}.author_name) LIKE lower('%'||#{keyword}||'%')) 
-			</when>
-			<otherwise>
-				AND lower(b.title) like lower('%'||#{keyword}||'%') or lower(b.publisher_name) like lower('%'||#{keyword}||'%') or 
-				EXISTS (
-				  SELECT 1
- 				 FROM book_author ba${index}
- 				 INNER JOIN author a${index} ON ba${index}.author_id = a${index}.author_id
-  				WHERE ba${index}.isbn = b.isbn
-  				AND lower(a${index}.author_name) LIKE lower('%'||#{keyword}||'%'))
-			</otherwise>
-		</choose>
-	</if>
-	</foreach>
-	<if test="publishStart!=0">
-	AND b.publication_year <![CDATA[>]]>= #{publishStart}
-	</if>
-	<if test="publishEnd!=0">
-	AND b.publication_year <![CDATA[<]]>= #{publishEnd}
-	</if>
-	</trim>
-	</where>
-	)
-	result
-	INNER JOIN (
-  	SELECT isbn, COALESCE(
-  	MIN(CASE WHEN status = '대출가능' THEN copy_id ELSE NULL END), 
-  	MIN(CASE WHEN status = '대출중' THEN copy_id ELSE NULL END),
-  	MIN(copy_id)) as copy_id
-  	FROM copy
-  	GROUP BY isbn
-	) available ON result.isbn = available.isbn
-	INNER JOIN copy c ON available.copy_id = c.copy_id
-	where author_type='지음' 
-	<if test="sort !=null and sort!=''">
-	order by ${sort}  <if test="order == 'desc'"> desc </if>
-	</if>
-	)
-	where rn between #{start} and #{end}
-	</select>
-	 -->
-	
 	
 	
 	
@@ -273,175 +176,52 @@
     </select>
     
     
-    
-    	<select id="searchListExact" resultMap="bookResultMap">
+	<select id="searchListKeyAndExact" resultMap="bookResultMap">
 	select * 
-	from
-	(select result.*, c.call_number, c.location, c.status, c.copy_id, dense_rank() over (order by result.isbn) as rn
-	from
-	(SELECT b.isbn, b.img_url, b.title, b.publication_year, b.publisher_name, b.register_date,
-	ba.author_id, ba.author_type, a.author_name
-	FROM books b
-	INNER JOIN book_author ba ON b.isbn = ba.isbn
-	INNER JOIN author a ON ba.author_id = a.author_id
-	<where>
-	<trim prefixOverrides="AND">
-	<foreach item="keyword" index="index" collection="keywords">
-	<if test="keywords[index] != '' and keywords[index] != null">
+		from
+		(
+		select result.isbn, img_url, title, publication_year, publisher_name, register_date, main_author,
+		c.call_number, c.location, c.status, 
 			<choose>
-			<when test="options[index] == 'title'">
-				AND lower(b.title) = lower(#{keyword})
-			</when>
-			<when test="options[index] == 'publisher_name'">
-				AND lower(b.publisher_name) = lower(#{keyword})
-			</when>
-			<when test="options[index] == 'author_name'">
-				AND EXISTS (
-				  SELECT 1
- 				 FROM book_author ba${index}
- 				 INNER JOIN author a${index} ON ba${index}.author_id = a${index}.author_id
-  				WHERE ba${index}.isbn = b.isbn
-  				AND lower(a${index}.author_name) = lower(#{keyword})) 
-			</when>
-			<otherwise>
-				AND lower(b.title) = lower(#{keyword}) or lower(b.publisher_name) = lower(#{keyword}) or 
-				EXISTS (
-				  SELECT 1
- 				 FROM book_author ba${index}
- 				 INNER JOIN author a${index} ON ba${index}.author_id = a${index}.author_id
-  				WHERE ba${index}.isbn = b.isbn
-  				AND lower(a${index}.author_name) = lower(#{keyword}))
-			</otherwise>
-		</choose>
-	</if>
-	</foreach>
-	<if test="publishStart!=0">
-	AND b.publication_year <![CDATA[>]]>= #{publishStart}
-	</if>
-	<if test="publishEnd!=0">
-	AND b.publication_year <![CDATA[<]]>= #{publishEnd}
-	</if>
-	</trim>
-	</where>
-	)
-	result
-	INNER JOIN (
-  	SELECT isbn, COALESCE(
-  	MIN(CASE WHEN status = '대출가능' THEN copy_id ELSE NULL END), 
-  	MIN(CASE WHEN status = '대출중' THEN copy_id ELSE NULL END),
-  	MIN(copy_id)) as copy_id
-  	FROM copy
-  	GROUP BY isbn
-	) available ON result.isbn = available.isbn
-	INNER JOIN copy c ON available.copy_id = c.copy_id
-	where author_type='지음'
-	<if test="sort !=null and sort!=''">
-	order by ${sort}  <if test="order == 'desc'"> desc </if>
-	</if>
-	)
-	where rn between #{start} and #{end}
-	</select>
-    
-    
-    	<select id="makeFilterExact" resultType="book.dto.FilterDTO">
-	   SELECT *
-	 	 FROM (SELECT a.author_name as f_author, b.publisher_name as f_publisher, substr(classification_code,1,1) as f_category, 
-	    count(distinct b.isbn) as f_count, row_number() over (partition by grouping_id(a.author_name, b.publisher_name,
-	    substr(classification_code,1,1)) order by count(distinct b.isbn) desc) as f_row_num, max(publication_year) recentest, min(publication_year) oldest
-	  	FROM books b
-	  	JOIN book_author ba ON b.isbn = ba.isbn
-	  	JOIN author a ON ba.author_id = a.author_id
-  		<where>
-	<trim prefixOverrides="AND">
-	<foreach item="keyword" index="index" collection="keywords">
-	<if test="keywords[index] != '' and keywords[index] != null">
-			<choose>
-			<when test="options[index] == 'title'">
-				AND lower(b.title) = lower(#{keyword})
-			</when>
-			<when test="options[index] == 'publisher_name'">
-				AND lower(b.publisher_name) = lower(#{keyword})
-			</when>
-			<when test="options[index] == 'author_name'">
-				AND EXISTS (
-				  SELECT 1
- 				 FROM book_author ba${index}
- 				 INNER JOIN author a${index} ON ba${index}.author_id = a${index}.author_id
-  				WHERE ba${index}.isbn = b.isbn
-  				AND lower(a${index}.author_name) = lower(#{keyword})) 
-			</when>
-			<otherwise>
-				AND lower(b.title) = lower(#{keyword}) or lower(b.publisher_name) = lower(#{keyword}) or 
-				EXISTS (
-				  SELECT 1
- 				 FROM book_author ba${index}
- 				 INNER JOIN author a${index} ON ba${index}.author_id = a${index}.author_id
-  				WHERE ba${index}.isbn = b.isbn
-  				AND lower(a${index}.author_name) = lower(#{keyword}))
-			</otherwise>
-		</choose>
-	</if>
-	</foreach>
-	<if test="publishStart!=0">
-	AND b.publication_year <![CDATA[>]]>= #{publishStart}
-	</if>
-	<if test="publishEnd!=0">
-	AND b.publication_year <![CDATA[<]]>= #{publishEnd}
-	</if>
-	</trim>
-	</where>
-  	GROUP BY grouping sets(a.author_name, b.publisher_name, substr(classification_code,1,1), ()))
-	  WHERE f_row_num <![CDATA[<]]>= 20
-    </select>
-
-
-
-	<select id="searchListKeyAndExact" resultMap="bookResultMap2">
-	select * 
-	from
-	(
-	select result2.*, c.call_number, c.location, c.status, row_number() over(order by ${sort} ${order}) as rn
-	from
-	(
-	select isbn, img_url, title, publication_year, publisher_name, register_date,
-	LISTAGG(author_name, ';') WITHIN GROUP (ORDER BY preference DESC, author_id) AS authorNames
-	from
-	(SELECT b.isbn, b.img_url, b.title, b.publication_year, b.publisher_name, b.register_date,
-	ba.author_id, ba.author_type, ba.preference, 
-	a.author_name
-	FROM books b
-	INNER JOIN book_author ba ON b.isbn = ba.isbn
-	INNER JOIN author a ON ba.author_id = a.author_id	
-	<where>
-	<trim prefixOverrides="AND">
-	<include refid="searchUsingKeyword"/>
-	<include refid="searchUsingExactKeyword"/>
-	<if test="publishStart!=0">
-	AND b.publication_year <![CDATA[>]]>= #{publishStart}
-	</if>
-	<if test="publishEnd!=0">
-	AND b.publication_year <![CDATA[<]]>= #{publishEnd}
-	</if>
-	</trim>
-	</where>
-	) result
-	where author_type = '지음'
-	group by isbn, img_url, title, publication_year, publisher_name, register_date
-	) result2
-	INNER JOIN (
-	  SELECT isbn, COALESCE(
-	  MIN(CASE WHEN status = '대출가능' THEN copy_id ELSE NULL END), 
-	  MIN(CASE WHEN status = '대출중' THEN copy_id ELSE NULL END),
-	  MIN(copy_id)) as copy_id
-	  FROM copy
-	  GROUP BY isbn
-	) available ON result2.isbn = available.isbn
-	INNER JOIN copy c ON available.copy_id = c.copy_id
-	)
-	where rn between #{start} and #{end}	
-	</select>
-
-
+				<when test="sort!=null and sort!=''">
+					row_number() over(order by ${sort} ${order}) as rn		
+				</when>
+				<otherwise>
+					rownum as rn
+				</otherwise>
+			</choose>
+		from
+		(
+        select b.isbn, b.img_url, b.title, b.publication_year, b.publisher_name, b.register_date, b.main_author
+        FROM books b
+		<where>
+		<trim prefixOverrides="AND">
+		<include refid="searchUsingKeyword"/>
+		<include refid="searchUsingExactKeyword"/>
+		<if test="publishStart!=0">
+		AND b.publication_year <![CDATA[>]]>= #{publishStart}
+		</if>
+		<if test="publishEnd!=0">
+		AND b.publication_year <![CDATA[<]]>= #{publishEnd}
+		</if>
+		</trim>
+		</where>
+        )result
+		inner JOIN (
+		  SELECT isbn, COALESCE(
+		  MIN(CASE WHEN status = '대출가능' THEN copy_id ELSE NULL END), 
+		  MIN(CASE WHEN status = '대출중' THEN copy_id ELSE NULL END),
+		  MIN(copy_id)) as copy_id
+		  FROM copy
+		  GROUP BY isbn
+		) available ON result.isbn = available.isbn
+		inner JOIN copy c ON available.copy_id = c.copy_id
+		)
+		where rn between #{start} and #{end}
+		order by rn
+		</select>
+	
+	
 
     <select id="makeFilterKeyAndExact" resultType="book.dto.FilterDTO">
 	    SELECT *
@@ -482,12 +262,10 @@
 	<result column="edition" property="edition"/>
 	<result column="book_description" property="book_description"/>
 	<result column="img_url" property="img_url"/>
-	<collection property="authors" javaType="java.util.List" ofType="book.dto.Book_AuthorDTO">
-		<id column= "book_author_id" property="book_author_id"/>
+	<collection property="authors" javaType="java.util.List" ofType="book.dto.AuthorDTO">
+		<result column= "book_author_id" property="book_author_id"/>
 		<result column="author_type" property="author_type"/>
-		<association property="author" javaType="book.dto.AuthorDTO">
-			<result column="author_name" property="author_name"/>
-		</association>
+		<result column="author_name" property="author_name"/>
 	</collection>
 	</resultMap>
 	
@@ -499,30 +277,23 @@
 		join book_author ba on b.isbn = ba.isbn
 		join author a on ba.author_id = a.author_id
 		where b.isbn = #{isbn}
+		order by ba.book_author_id
 	</select>
 	
 	
-	<resultMap id="topBookMap" type="java.util.Map">
-	<result column="isbn" property="isbn"/>
-	<result column="checkout_times" property="checkout_times"/>
-	<result column="rn" property="rn"/>
-	<result column="title" property="title"/>
-	<result column="publisher_name" property="publisher_name"/>
-	<result column="img_url" property="img_url"/>
-	<result column="authornames" property="authornames"/>	
-	</resultMap>
-	
-	<select id="topList" resultMap="topBookMap">
-      select result.*, b.title, b.img_url, b.publisher_name, LISTAGG(a.author_name, ';') within group (order by ba.preference desc, a.author_id) as authornames
+	<select id="topList" resultType="book.dto.BookDTO">
+	  select result.*, b.title, b.img_url, b.publisher_name, b.main_author
       from
-      (select tmp.*, row_number() over(order by checkout_times desc) as rn
+      (
+      select tmp.*, row_number() over(order by checkout_times desc) as rank
 	  from
       (
-      select chk.isbn, count(*) as checkout_times
+      select b.isbn, count(*) as checkout_times
       from checkout chk
+      join copy c on chk.copy_id = c.copy_id
+      join books b on c.isbn = b.isbn
       <choose>
       	<when test="classification_code != null and classification_code != ''">
-      	inner join books b on b.isbn = chk.isbn
       	where substr(b.classification_code, 0, 1) in (${classification_code})
       	and checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
         </when>
@@ -530,17 +301,15 @@
         where checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
         </otherwise>
       </choose>   
-      group by chk.isbn
+      group by b.isbn
       order by checkout_times desc
       )tmp
       )result
       inner join books b on result.isbn = b.isbn
-      inner join book_author ba on b.isbn = ba.isbn
-      inner join author a on ba.author_id = a.author_id
-      where rn between #{start} and #{end}
-      group by b.title, b.img_url, b.publisher_name, rn, result.isbn, checkout_times
-      order by rn
+      where rank between #{start} and #{end} 
+      order by rank
 	</select>
+
 	
 	
 	<select id="getTopNums" resultType="int">
@@ -549,11 +318,12 @@
       (select tmp.*, row_number() over(order by checkout_times desc) as rn
       from
       (
-      select chk.isbn, count(*) as checkout_times
+      select b.isbn, count(*) as checkout_times
       from checkout chk
+      join copy c on chk.copy_id = c.copy_id
+      join books b on c.isbn = b.isbn
       <choose>
       	<when test="classification_code != null and classification_code != ''">
-      	inner join books b on b.isbn = chk.isbn
       	where substr(b.classification_code, 0, 1) in (${classification_code})
       	and checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
         </when>
@@ -561,15 +331,66 @@
         where checkout_date <![CDATA[>]]>= trunc(sysdate-${days})
         </otherwise>
       </choose>
-      group by chk.isbn
+      group by b.isbn
       order by checkout_times desc
       )tmp
       )result
-      where rn <![CDATA[<]]>= #{max}
+      where rn <![CDATA[<]]>= #{max} 
 	</select>
 
 
-
-
+    <select id="getBookReserveCount" resultType="int">
+    select count(*) from reservation
+	where isbn = #{isbn}
+	and
+	expiration_date is null
+    </select>
+    
+    
+    <resultMap id="simpleBookMap" type="hashMap">
+	<id property="isbn" column="isbn" />
+ 	<result property="title" column="title" />
+ 	<result property="img_url" column="img_url" />
+ 	<result property="main_author" column="main_author" />
+	</resultMap>
+    
+    
+    <select id="simpleTopList" resultMap="simpleBookMap">
+      select b.isbn, b.title, b.img_url, b.main_author
+      from
+      (
+      select tmp.*, row_number() over(order by checkout_times desc) as rank
+	  from
+      (
+      select b.isbn, count(*) as checkout_times
+      from checkout chk
+      join copy c on c.copy_id = chk.copy_id
+      join books b on b.isbn = c.isbn
+      where checkout_date >= trunc(sysdate-30)
+      group by b.isbn
+      order by checkout_times desc
+      )tmp
+      )result
+      inner join books b on result.isbn = b.isbn
+      where rank between #{start} and #{end} 
+      order by rank
+    </select>
+    
+    
+    <select id="simpleRecentList" resultMap="simpleBookMap">
+    select *
+	from
+	(
+	select a.*, row_number() over (order by register_date desc) as rn
+	from
+	(
+	select b.isbn, b.register_date, b.title, b.img_url, b.main_author
+	from books b
+	where exists (select 1 from copy c where c.isbn = b.isbn)
+	)
+	a
+	)
+	where rn between #{start} and #{end}
+	</select>
 
 </mapper>

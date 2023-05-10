@@ -1,6 +1,8 @@
 package book.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 
@@ -45,30 +47,27 @@ public class CopyDAO {
 
     	}
 
-	public void makeCopy(CopyDTO cdto) {
+	
+	public boolean checkReservationForCopy(long user_id, long copy_id) {
+		
+		boolean check = false;
+		
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
-			session.insert("copy.add", cdto);
-			session.commit();
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
+			Map<String, Long> map = new HashMap<>();
+			map.put("user_id", user_id);
+			map.put("copy_id", copy_id);
+			
+			int reservation = session.selectOne("copy.checkReservationForCopy", map);
+			if(reservation > 0) check = true;
 
-	public List<CopyDTO> list(long isbn) {
-		
-		List<CopyDTO> copies = null;
-		
-		try(SqlSession session = MybatisManager.getInstance().openSession()) {
-			copies = session.selectList("copy.list", isbn);
-			} catch (Exception e) {
+		} catch (Exception e) {
 	        e.printStackTrace();
 	    	}
-	    
-	    return copies;
-		}
 		
+		return check;
+		
+	}
 
 
 }

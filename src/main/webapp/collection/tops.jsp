@@ -112,7 +112,8 @@
     }
 
     .imagewrapper img{
-      width: 100%;
+      width: 160px;
+      height: 240px;
       border: #bbc4c7 solid 1px;
 
     }
@@ -336,7 +337,7 @@
 	      <div class="bestBook">
 	        <div class="bestBookWrapper">
 	          <div class="imagewrapper">
-	            <div>${book.rn}</div>
+	            <div>${book.rank}</div>
 	            <a href="#" onclick="location.href='${path}/book_servlet/view.do?isbn=${book.isbn}'" >
                 <c:choose>
                 	<c:when test="${book.img_url!='' && book.img_url!=null}">
@@ -350,7 +351,7 @@
 	          </div>
 	          <div>${book.title}</div>
 	          <div>
-	          ${fn:split(book.authornames, ';')[0]}
+	          ${book.main_author}
 	          <br>
 	          ${book.publisher_name}
 	          </div>
