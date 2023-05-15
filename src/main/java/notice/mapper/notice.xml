@@ -6,21 +6,34 @@
 <mapper namespace="notice">
 
 	<insert id="write" parameterType="notice.dto.NoticeDTO">
-	insert into notice (notice_id, writer_id, title, notice_content, post_category, fix)  
-	values (notice_id_seq.nextval, #{writer_id}, #{title}, #{notice_content}, #{post_category}, #{fix})	
+	insert into notice (notice_id, writer_id, title, 
+	notice_content, post_category, fix, filename, filesize)  
+	values (notice_id_seq.nextval, #{writer_id}, #{title}, 
+	#{notice_content}, #{post_category}, #{fix}, #{filename}, #{filesize})	
 	</insert>
+	
+	
+	<update id="update">
+	update notice
+	set title=#{title}, notice_content=#{notice_content},
+	post_category = #{post_category}, fix=#{fix},
+	filename=#{filename}, filesize=#{filesize}
+	where notice_id = #{notice_id}
+	</update>
+	
 
 	<select id="list" resultType="notice.dto.NoticeDTO">
 	select *
     from
     (select rownum rn, a.*
-	from (select n.*, d.dept_name 
+	from (select notice_id, post_date, writer_id, title, post_category, 
+	view_count, fix, filename, filesize, d.dept_name 
 	from notice n
-    <if test="category!=null and category!=''">
-	where post_category = #{category}
-	</if>
 	join admin a on n.writer_id = a.admin_id
 	join lib_dept d on a.dept_id = d.dept_id
+	<if test="category!=null and category!=''">
+	where post_category = #{category}
+	</if>
 	order by fix desc, notice_id desc) a)
     where rn between #{start} and #{end}
 	</select>
@@ -67,6 +80,13 @@
 	) a
 	)
 	where rn between 1 and #{end}
+	</select>
+	
+	
+	<select id="getFileName" resultType="String">
+		select filename
+		from notice
+		where notice_id = #{notice_id}
 	</select>
 	
 	

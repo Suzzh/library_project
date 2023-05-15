@@ -16,7 +16,7 @@ public class NoticeDTO {
 
 	private String filename;
 	private int filesize;
-	private String ext;
+	private String ext; //첨부파일의 확장자. 테이블에는 없음
 	public int getNotice_id() {
 		return notice_id;
 	}

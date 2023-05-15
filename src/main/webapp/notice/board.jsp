@@ -286,7 +286,11 @@
         <td>${dto.dept_name}</td>
         <td><fmt:formatDate value="${dto.post_date}" pattern="yyyy-MM-dd"/></td>
         <td>${dto.view_count}</td>
-        <td></td>
+        <td>
+        <c:if test="${dto.filesize>0}">
+        <img src="${path}/include/disk.png" width="20px;">
+        </c:if>
+        </td>
       </tr>
       </c:forEach>
       </tbody>

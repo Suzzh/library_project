@@ -131,7 +131,8 @@
         홈 &gt 도서관안내 &gt 공지사항
     </div>
     <div class="contentsMain">
-    <form method="post" action="${path}/notice_servlet/write.do">
+    <form method="post" enctype="multipart/form-data" 
+    action="${path}/notice_servlet/write.do">
         <div class="writeBox">
             <div><input type="checkbox" name="fix" id="fix"><label for="fix">상단고정</label></div>
             <div>
@@ -145,7 +146,7 @@
             </div>
             <textarea id="notice_content" name="notice_content"></textarea>
             <div>
-                <input type="file" name="file"><output></output>
+                <input type="file" name="file1"><output></output>
             </div>
             <div>
             <input type="submit" value="등록" onclick="return check()">

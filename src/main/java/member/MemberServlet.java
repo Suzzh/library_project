@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import admin.dao.AdminDAO;
 import member.dao.MemberDAO;
 import member.dto.MemberDTO;
 import work.Library;
@@ -39,23 +40,38 @@ public class MemberServlet extends HttpServlet {
 		
 		else if(uri.indexOf("login.do")!=-1) {
 			
-			System.out.println("왜안됨");
+			System.out.println("로그인 서블릿 접속");
+			
 			HttpSession session = request.getSession();
 			long user_id = 0;
 			try {
 				user_id = Long.parseLong(request.getParameter("id"));
 			} catch (Exception e) {
 				e.printStackTrace();
+				System.out.println("변환에러");
 			}
 			
+			String type = request.getParameter("login_type");
+			System.out.println("login_type : " + request.getParameter("login_type"));
 			String passwd = request.getParameter("passwd");
-			String name = dao.loginCheck(user_id, passwd);
+			
+			String name = "";
+			if(type!=null && type.equals("admin")) {
+				AdminDAO adminDao = new AdminDAO();
+				name = adminDao.loginCheck(user_id, passwd);
+				System.out.println("관리자로그인 체크");
+			}
+			
+			else {
+				name = dao.loginCheck(user_id, passwd);
+				System.out.println("유저로그인 체크");
+			}
 			
 			String message="";
 			String page="";
 			
 			if(name==null || name.equals("")) { //로그인 실패
-				System.out.println("왜안됨2");
+				System.out.println("로그인 실패!");
 				message="※ ID 또는 비밀번호가 일치하지 않습니다. 다시 시도해 주세요.";
 				message = URLEncoder.encode(message, "utf-8");
 				
@@ -76,10 +92,14 @@ public class MemberServlet extends HttpServlet {
 				}
 				
 			} else { //로그인 성공 시
-				System.out.println("왜안됨3");
 				session = request.getSession();
 				session.setAttribute("user_id", user_id);
 				session.setAttribute("user_name", name);
+				
+				if(type.equals("admin")) {
+					session.setAttribute("admin_id", user_id);
+					session.setAttribute("admin_name", name);
+				}
 				
 				if(request.getParameter("originalRequestURI")!=null) {
 					page = request.getParameter("originalRequestURI");
@@ -94,7 +114,6 @@ public class MemberServlet extends HttpServlet {
 				}
 						
 				else page = "/index.jsp";
-				System.out.println("오잉3");
 				
 			}
 			

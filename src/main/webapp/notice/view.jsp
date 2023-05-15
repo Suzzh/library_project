@@ -53,19 +53,31 @@
       padding: 30px 15px;
       border-bottom: 1px solid #bbc4c7;
     }
-
-    #toList{
-      margin: 20px auto 0 auto;
+    
+    #buttonSpace{
+    	display: flex;
+    	flex-direction: row;
+    	justify-content: center;
+    }
+    
+    .buttons{
+      margin: 20px 5px 0 5px;
       width: 80px;
       height: 36px;
       line-height: 36px;
       font-size: 15px;
-      background-color: #042d04;
+      background-color: #6e736e;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
+
+    #toList{
+	  background-color: #042d04;
+    }
+    
+
 
 
   </style>
@@ -97,7 +109,20 @@
       <div><fmt:formatDate value="${dto.post_date}" pattern="yyyy-MM-dd"/></div>
       <div>조회: ${dto.view_count}</div></div>
       <div class="notice_content">${dto.notice_content}</div>
-      <button onclick="location.href='${path}/notice_servlet/board.do?category=${category}&curPage=${curPage}'" id="toList">목록</button>
+      <div>
+      <c:if test="${dto.filesize>0}">
+      <img src="${path}/include/disk.png" width="30px;">
+      <a href="${path}/notice_servlet/download.do?notice_id=${dto.notice_id}">
+      ${dto.filename}</a> (${dto.filesize} bytes)
+      </c:if>
+      </div>
+      <div id="buttonSpace">
+	      <button onclick="location.href='${path}/notice_servlet/board.do?category=${category}&curPage=${curPage}'" class="buttons" id="toList">목록</button>
+	      <c:if test="${sessionScope.admin_id == dto.writer_id}">
+	      <button onclick="location.href='${path}/notice_servlet/editForm.do?notice_id=${dto.notice_id}'" class="buttons">수정</button>
+	      <button onclick="location.href='${path}/notice_servlet/delete.do?notice_id=${dto.notice_id}'" class="buttons">삭제</button>      
+	      </c:if>
+      </div>
     </div>
 
 

@@ -8,6 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.BatchResult;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
 import config.DB;
@@ -55,14 +60,19 @@ public class NoticeDAO {
 	}
 
 
-	public NoticeDTO viewNotice(int notice_id) {
+	public NoticeDTO viewNotice(int notice_id, boolean updateViewCount) {
 		
 		NoticeDTO dto = null;
 		
 		try(SqlSession session = MybatisManager.getInstance().openSession()) {
-			session.update("notice.updateViewCount", notice_id);
+
+			if(updateViewCount == true) {
+				session.update("notice.updateViewCount", notice_id);
+				session.commit();
+			}
+
 			dto = session.selectOne("notice.view", notice_id);
-			session.commit();
+
 			session.close();
 
 		} catch (Exception e) {
@@ -104,6 +114,29 @@ public class NoticeDAO {
 			e.printStackTrace();
 		}
 		return noticeList;
+	}
+
+	
+	//게시글의 첨부파일 이름 찾기
+	public String getFileName(int notice_id) {
+		String filename = "";
+		
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			filename = session.selectOne("notice.getFileName", notice_id);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return filename;
+	}
+
+
+	public void updateBoard(NoticeDTO dto) {
+		try(SqlSession session = MybatisManager.getInstance().openSession()) {
+			session.update("notice.update", dto);
+			session.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 

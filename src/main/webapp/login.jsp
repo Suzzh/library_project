@@ -185,15 +185,7 @@
           return false;
         }
         
-		if($("input[name=login_type]:checked").val()=="admin"){
-			document.loginForm.action = "${path}/admin_servlet/login.do";
-			document.loginForm.submit();
-		}
-		
-		else{
-			document.loginForm.action = "${path}/member_servlet/login.do";
-			document.loginForm.submit();
-		}
+		document.loginForm.submit();
         
     }
 
@@ -221,6 +213,7 @@
   </div>
   <div class="contentsMain">
   <div class="login-box">
+   <form method="post" class="loginForm" name="loginForm" action="${path}/member_servlet/login.do">
      <div>
       <input type="radio" name="login_type" value="student" checked="checked" id="std_radio">
       <label for="std_radio">사용자 로그인</label>
@@ -228,8 +221,6 @@
       <label for="admin_radio">관리자 로그인</label>
      </div>
     <div class="login-box-main">
-      <form method="post" class="loginForm" name="loginForm">
-      
       <%
       
       if (session != null && session.getAttribute("user_id") != null) { 
@@ -268,8 +259,8 @@
       </div>
         <button type="button" id="loginBtn" onClick="gotoLogin()">로그인</button>
       </div>
-      </form>
     </div>
+    </form>
     <div id="errorMessage">
     <%
     String message = request.getParameter("message");
