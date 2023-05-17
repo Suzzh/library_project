@@ -11,34 +11,37 @@
   <link href="${path}/include/style.css" type="text/css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
 <script src="${path}/include/header.js"></script>
+<script src="${path}/ckeditor/ckeditor.js"></script>
 
 
     <title>공지등록</title>
     <style>
 
         .writeBox{
-            display: flex;
             width: 100%;
-            flex-direction: column;
         }
 
-        .writeBox div{
-            display: flex;
-            flex: 1 1 100%;
-        }
 
         .writeBox > div:first-of-type{
             margin-bottom: 10px;
         }
+        
+        #titleArea{
+        	display: flex;
+        	margin-bottom: 10px;
+        }
 
         .writeBox select{
             padding-left: 10px;
-            width: 130px;
+            width: 150px;
             height: 30px;
             font-size: 15px;
-
         }
-
+        
+        #titleArea input{
+        	flex: 1 1 500px;
+        }
+        
         #title{
             flex-grow: 1;
             margin-left: 5px;
@@ -53,12 +56,13 @@
             padding: 10px 10px;
             font-size: 15px;
         }
-
+        
+        
         .writeBox input[type="file"], textarea{
             margin-top: 10px;
         }
 
-        .writeBox div:last-of-type {
+        .writeBox > div:last-of-type {
             display: flex;
             flex-direction: row;
             justify-content: center;
@@ -90,7 +94,7 @@
              $("#title").focus();
              return false;
           }
-         else if($("#notice_content").val().trim()==""){
+         else if($("#ck_notice_content").val().trim()==""){
              alert("내용을 입력해주세요.");
              $("#notice_content").focus();
              return false;
@@ -135,7 +139,7 @@
     action="${path}/notice_servlet/write.do">
         <div class="writeBox">
             <div><input type="checkbox" name="fix" id="fix"><label for="fix">상단고정</label></div>
-            <div>
+            <div id="titleArea">
                 <select name="post_category" id="post_category">
                     <option value="">분류</option>
                     <option value="일반">일반</option>
@@ -145,6 +149,11 @@
                 <input type="text" placeholder="제목" id="title" name="title">
             </div>
             <textarea id="notice_content" name="notice_content"></textarea>
+            <script>
+            CKEDITOR.replace("notice_content", {
+            	filebrowserUploadUrl : "${path}/notice_servlet/imageUpload.do"
+            })
+            </script>
             <div>
                 <input type="file" name="file1"><output></output>
             </div>
